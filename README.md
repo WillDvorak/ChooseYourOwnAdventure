@@ -7,16 +7,21 @@ Also, be sure to check out the Wiki for information on how to maintain your team
 ## TeamName
 
 <!--The name of your team.-->
+Team 10
 
 ### Project Abstract
 
 <!--A one paragraph summary of what the software will do.-->
 
-This is an example paragraph written in markdown. You can use *italics*, **bold**, and other formatting options. You can also <u>use inline html</u> to format your text. The example sections included in this document are not necessarily all the sections you will want, and it is possible that you won't use all the one's provided. It is your responsibility to create a document that adequately conveys all the information about your project specifications and requirements.
+This software will provide the user with an intereactive **text-based** choose your own adventure style game, it will prompt the user to make decisions and return reactions or consequences depending on the input of the user, allowing them to create their own unique experience. The user will be directed through various in game places, discussions, possible actions they can take, etc. There will be many different possible ending for the user to find!
 
-Please view this file's source to see `<!--comments-->` with guidance on how you might use the different sections of this document. 
+<!-- This is an example paragraph written in markdown. You can use *italics*, **bold**, and other formatting options. You can also <u>use inline html</u> to format your text. The example sections included in this document are not necessarily all the sections you will want, and it is possible that you won't use all the one's provided. It is your responsibility to create a document that adequately conveys all the information about your project specifications and requirements. -->
+
+<!-- Please view this file's source to see `comments` with guidance on how you might use the different sections of this document.  -->
 
 ### Customer
+
+The customer that may use this software is someone that enjoys text-based activities, they may be a big fan of reading but want to make it more interesting by chosing their own outcomes. The customer will see that they are provided with many paths to take, decisions to make, and flexibility in what they wish to do within the software.
 
 <!--A brief description of the customer for this software, both in general (the population who might eventually use such a system) and specifically for this document (the customer(s) who informed this document). Every project will have a customer from the CS506 instructional staff. Requirements should not be derived simply from discussion among team members. Ideally your customer should not only talk to you about requirements but also be excited later in the semester to use the system.-->
 
@@ -30,9 +35,9 @@ Please view this file's source to see `<!--comments-->` with guidance on how you
 
 #### Technology Stack
 
-Here are some sample technology stacks that you can use for inspiration:
+<!-- Here are some sample technology stacks that you can use for inspiration: -->
 
-```mermaid
+<!-- >```mermaid
 flowchart RL
 subgraph Front End
 	A(Javascript: React)
@@ -46,11 +51,12 @@ subgraph Database
 	C[(MySQL)]
 end
 
-A <-->|"REST API"| B
-B <-->|Django ORM| C
+A <->|"REST API"| B
+B <->|Django ORM| C
 ```
+--->
 
-```mermaid
+<!-- ```mermaid
 flowchart RL
 subgraph Front End
 	A(Javascript: Vue)
@@ -64,11 +70,11 @@ subgraph Database
 	C[(MySQL)]
 end
 
-A <-->|"REST API"| B
-B <-->|SQLAlchemy| C
-```
+A <- ->|"REST API"| B
+B <- ->|SQLAlchemy| C
+``` -->
 
-```mermaid
+<!-- ```mermaid
 flowchart RL
 subgraph Front End
 	A(Javascript: Vue)
@@ -82,9 +88,9 @@ subgraph Database
 	C[(MySQL)]
 end
 
-A <-->|"REST API"| B
-B <--> C
-```
+A <- ->|"REST API"| B
+B <- -> C
+``` -->
 
 ```mermaid
 flowchart RL
@@ -104,7 +110,7 @@ A <-->|HTTP| B
 B <--> C
 ```
 
-```mermaid
+<!-- ```mermaid
 flowchart RL
 subgraph Front End
 	A(Mobile App)
@@ -118,13 +124,13 @@ subgraph Database
 	C[(MySQL)]
 end
 
-A <-->|REST API| B
-B <-->|Django ORM| C
-```
+A <- ->|REST API| B
+B <- ->|Django ORM| C
+``` -->
 
 
 
-#### Database
+<!-- #### Database
 
 ```mermaid
 ---
@@ -162,9 +168,9 @@ erDiagram
         int product_id FK
         int quantity
     }
-```
+``` -->
 
-#### Class Diagram
+<!-- #### Class Diagram
 
 ```mermaid
 ---
@@ -193,7 +199,7 @@ classDiagram
     Animal <|-- Dog
     Animal <|-- Cat
     Animal <|-- Bird
-```
+``` -->
 
 #### Flowchart
 
@@ -214,23 +220,23 @@ graph TD;
     Error_Message --> End;
 ```
 
-#### Behavior
+<!--  #### Behavior
 
 ```mermaid
 ---
 title: Sample State Diagram For Coffee Application
 ---
 stateDiagram
-    [*] --> Ready
-    Ready --> Brewing : Start Brewing
-    Brewing --> Ready : Brew Complete
-    Brewing --> WaterLowError : Water Low
-    WaterLowError --> Ready : Refill Water
-    Brewing --> BeansLowError : Beans Low
-    BeansLowError --> Ready : Refill Beans
-```
+    [*] - -> Ready
+    Ready - -> Brewing : Start Brewing
+    Brewing - -> Ready : Brew Complete
+    Brewing - -> WaterLowError : Water Low
+    WaterLowError - -> Ready : Refill Water
+    Brewing - -> BeansLowError : Beans Low
+    BeansLowError - -> Ready : Refill Beans
+``` -->
 
-#### Sequence Diagram
+<!-- #### Sequence Diagram
 
 ```mermaid
 sequenceDiagram
@@ -245,12 +251,12 @@ activate DjangoBackend
 DjangoBackend ->> MySQLDatabase: Query (e.g., SELECT * FROM data_table)
 activate MySQLDatabase
 
-MySQLDatabase -->> DjangoBackend: Result Set
+MySQLDatabase - ->> DjangoBackend: Result Set
 deactivate MySQLDatabase
 
-DjangoBackend -->> ReactFrontend: JSON Response
+DjangoBackend - ->> ReactFrontend: JSON Response
 deactivate DjangoBackend
-```
+``` -->
 
 ### Standards & Conventions
 
