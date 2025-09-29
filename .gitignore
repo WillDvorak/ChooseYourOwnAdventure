@@ -1,2 +1,23 @@
+# OS
 .DS_Store
+Thumbs.db
 *.zip
+
+# Logs & temp
+/logs/
+/*.log
+/tmp/
+/*.tmp
+
+# IDE
+.idea/
+*.iml
+.project
+.classpath
+.settings/
+
+# Gradle
+/build/
+/.gradle/
+/out/
+/bin/
