@@ -1,0 +1,135 @@
+🌍 GAME TITLE: Echoes of the Shattered Realms
+🎯 Premise
+
+You awaken in a fractured world — five realms that once formed a single, thriving land. Each realm is now twisted by ancient magic, its fate shaped by your choices. Your goal: uncover what shattered the realms and decide whether to restore balance… or rule the chaos.
+
+🏰 CONSTANT ENVIRONMENTS (Appear Every Game)
+
+The Mistwood Forest – An ancient forest teeming with whispering spirits, hidden ruins, and shifting paths.
+
+The Ember City – A molten metropolis of forges, rebellion, and greed, built around a volcano’s heart.
+
+The Crystal Archives – A vast library of living crystals storing knowledge, guarded by sentient scholars.
+
+The Drowned Sanctum – A sunken temple city beneath the ocean, where echoes of lost gods still breathe.
+
+The Astral Gate – A realm between realms, the nexus of fate where all choices converge.
+
+🌲 1. THE MISTWOOD FOREST
+🕹️ Actions
+
+Follow the Whispers — Track the voices that call your name.
+
+Climb the Watcher Tree — Seek a view of the land and possible escape routes.
+
+Investigate the Ruined Shrine — Uncover relics of the old gods.
+
+Light a Fire — Create safety, but attract attention.
+
+🧭 Scenarios
+
+Follow the Whispers → Find a spectral guide offering to lead you to “truth”… at a price (later may betray you or save you in the Drowned Sanctum).
+
+Climb the Watcher Tree → Gain foresight of the Ember City’s location, unlocking a secret route and avoiding a future ambush.
+
+Investigate the Shrine → Obtain a relic (Forest Sigil). This item may calm ancient spirits or open the Astral Gate later.
+
+Light a Fire → Drive away predators but alert bandits. Next environment becomes Ember City with hostiles awaiting.
+
+🔥 2. THE EMBER CITY
+🕹️ Actions
+
+Join the Rebellion — Fight against the tyrant who hoards fire crystals.
+
+Trade with the Forgemaster — Exchange relics or gold for weapons or favors.
+
+Sneak into the Citadel — Steal information or an artifact.
+
+Challenge the Tyrant — Confront the ruler directly.
+
+🧭 Scenarios
+
+Join the Rebellion → Allies aid you later in the Astral Gate; however, Ember City burns further.
+
+Trade with the Forgemaster → Gain a Firebrand weapon that opens paths through obstacles in Mistwood or Drowned Sanctum.
+
+Sneak into the Citadel → Discover that the Tyrant guards a key shard of reality; unlocks Crystal Archives secret.
+
+Challenge the Tyrant → If you hold the Forest Sigil, you win by awakening an ancient spirit. Without it, you’re imprisoned (you must escape in the next environment).
+
+💎 3. THE CRYSTAL ARCHIVES
+🕹️ Actions
+
+Consult the Archivist — Seek truth about the Shattering.
+
+Steal Knowledge — Force the crystals to reveal forbidden history.
+
+Repair a Damaged Tome — Gain insight into the Drowned Sanctum.
+
+Destroy a Corrupted Crystal — Purge false knowledge at a cost.
+
+🧭 Scenarios
+
+Consult the Archivist → Learn the secret: one realm must be sacrificed to restore the others.
+
+Steal Knowledge → Gain immense wisdom, but the crystals curse your mind (unreliable choices later).
+
+Repair a Damaged Tome → Unlock a hidden underwater path to the Drowned Sanctum; skip dangers.
+
+Destroy a Corrupted Crystal → Prevent the spread of decay but lose your memories of the Mistwood (you forget one previous ally/item).
+
+🌊 4. THE DROWNED SANCTUM
+🕹️ Actions
+
+Follow the Siren Song — Be lured into the heart of the temple.
+
+Explore the Sunken Catacombs — Seek ancient technology.
+
+Negotiate with the Sea Priestess — Forge a pact or deception.
+
+Offer a Relic to the Depths — Use any item you’ve gathered.
+
+🧭 Scenarios
+
+Follow the Siren Song → Gain power over water, but risk losing your humanity.
+
+Explore the Catacombs → Find a portal shard (necessary for Astral Gate).
+
+Negotiate with the Priestess → Can gain her alliance if you helped the Rebellion; betrayal if you didn’t.
+
+Offer a Relic → Depends on the relic:
+
+Forest Sigil → calms the waters (safe passage).
+
+Firebrand → causes a steam explosion (unlocks secret vault).
+
+No relic → the sea swallows you (bad ending).
+
+🌌 5. THE ASTRAL GATE (Final Realm)
+🕹️ Actions
+
+Restore the Realms — Unite all fragments and bring harmony.
+
+Rule the Chaos — Merge all energy into yourself.
+
+Rebuild One Realm — Choose one domain to survive.
+
+Walk Away — Refuse power and leave the worlds to their fate.
+
+🧭 Endgame Scenarios
+
+Restore the Realms → Only possible if you collected 3 or more relics; world reborn (True Ending).
+
+Rule the Chaos → You ascend to godhood, but the world dies (Power Ending).
+
+Rebuild One Realm → The chosen realm thrives, others fade; bittersweet ending.
+
+Walk Away → You awaken back in the Mistwood, the cycle restarts (Loop Ending).
+
+⚙️ Summary of Game Flow
+Environment	Choice Impact	Leads To
+Mistwood Forest	Determines first relic/ally/conflict	Ember City
+Ember City	Decides weaponry & rebellion state	Crystal Archives
+Crystal Archives	Determines knowledge, curse, or key	Drowned Sanctum
+Drowned Sanctum	Tests loyalty & relic use	Astral Gate
+Astral Gate	Concludes based on all prior actions	Multiple Endings
