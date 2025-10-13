@@ -1,0 +1,8 @@
+html {
+    padding:  0 2rem;
+    overflow: hidden;
+}
+
+#root {
+  background-color: grey;
+}
