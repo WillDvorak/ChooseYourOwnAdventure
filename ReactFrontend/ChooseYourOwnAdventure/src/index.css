@@ -1,8 +1,17 @@
 html {
-    padding:  0 2rem;
+    padding: 0 2rem;
     overflow: hidden;
 }
 
+body {
+    margin: 0;
+    background: #0a0615;  
+}
+
 #root {
-  background-color: grey;
+    background: linear-gradient(135deg, #0a0615 0%, #1a0933 100%);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
