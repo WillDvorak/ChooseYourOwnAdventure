@@ -1,0 +1,55 @@
+services:
+  # Database Service
+  db:
+    image: mysql:8.0
+    container_name: textquest-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: textquest
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./sql:/docker-entrypoint-initdb.d:ro
+    command: ["--default-authentication-plugin=mysql_native_password"]
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-prootpass"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks:
+      - textquest-network
+
+  # Backend API Service
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: textquest-api
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/textquest
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: rootpass
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - textquest-network
+
+  # Frontend Service
+  frontend:
+    build:
+      context: ./ReactFrontend/ChooseYourOwnAdventure
+      dockerfile: Dockerfile
+    container_name: textquest-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - api
+    networks:
+      - textquest-network
+
+networks:
+  textquest-network:
+    driver: bridge
