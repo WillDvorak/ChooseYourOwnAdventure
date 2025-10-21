@@ -1,14 +1,55 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Container, Card, Form, Button } from "react-bootstrap"
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 const Textbox = () => {
-    const [messages, setMessages] = useState(["HARDCODE: A group of giant rats approach you, what do you do?"]);
+    const [messages, setMessages] = useState([]);
     const [input, setInput] = useState("");
-    const [choices, setChoices] = useState([
-        { id: 1, text: "Fight the rats", action: "fight" },
-        { id: 2, text: "Run away", action: "run away" }
-    ]);
+    const [choices, setChoices] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    const API_BASE = "http://localhost:8080/api/game";
+
+    // Load the intro scene on component mount
+    useEffect(() => {
+        loadScene("intro");
+    }, []);
+
+    const loadScene = async (sceneCode) => {
+        setLoading(true);
+        try {
+            const response = await fetch(`${API_BASE}/scene/${sceneCode}`);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            
+            // Set the scene body as the message
+            setMessages([data.body]);
+            
+            // Set choices from the scene
+            if (data.choices && data.choices.length > 0) {
+                const formattedChoices = data.choices.map((choice) => ({
+                    id: choice.id,
+                    text: choice.label,
+                    targetScene: choice.targetSceneCode,
+                    requiresFlag: choice.requiresFlag,
+                    setsFlag: choice.setsFlag
+                }));
+                setChoices(formattedChoices);
+            } else {
+                // No choices means it's a terminal scene
+                setChoices([]);
+            }
+        } catch (error) {
+            console.error('Error loading scene:', error);
+            setMessages(["⚠️ Error: Could not connect to the realm. Is the backend running?"]);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     // Dark Fantasy Theme Colors
     const theme = {
@@ -26,30 +67,27 @@ const Textbox = () => {
         inputBorder: '#d4af37'
     };
 
-    const handleChoice = (action, choiceText) => {
-        setMessages((prev) => [...prev, `> ${choiceText}`]);
+    const handleChoice = async (choice) => {
+        setMessages((prev) => [...prev, `> ${choice.text}`]);
         
-        if (action === "fight") {
-            setMessages((prev) => [...prev, "HARDCODE: you fight the rats and die"]);
-            setChoices([]);
-        }
-        else if (action === "run away") {
-            setMessages((prev) => [...prev, "HARDCODE: you escape from the rats"]);
-            setChoices([]);
-        }
+        // Load the target scene
+        await loadScene(choice.targetScene);
     }
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         if (!input.trim()) return;
-        setMessages((prev) => [...prev, input.trim()]);
-        if (input.trim() == "fight") {
-            setMessages((prev) => [...prev, "HARDCODE: you fight the rats and die"])
-        }
-        else if (input.trim() == "run away") {
-            setMessages((prev) => [...prev, "HARDCODE you escape from the rats"])
-        }
+        
+        const userInput = input.trim().toLowerCase();
+        setMessages((prev) => [...prev, `> ${input.trim()}`]);
         setInput("");
+        
+        // Check if user wants to load a different scene by code
+        if (["intro", "forest", "cave", "treasure"].includes(userInput)) {
+            await loadScene(userInput);
+        } else {
+            setMessages((prev) => [...prev, `Unknown command. Try scene names like "intro", "forest", "cave".`]);
+        }
     }
 
     return (
@@ -86,12 +124,27 @@ const Textbox = () => {
                     ))}
                 </div>
                 
-                {choices.length > 0 && (
+                {loading && (
+                    <div style={{
+                        textAlign: 'center', 
+                        padding: '1rem',
+                        color: theme.messageText,
+                        fontFamily: 'Georgia, serif'
+                    }}>
+                        <div className="spinner-border text-warning" role="status">
+                            <span className="visually-hidden">Loading...</span>
+                        </div>
+                        <p style={{marginTop: '0.5rem'}}>Consulting the ancient scrolls...</p>
+                    </div>
+                )}
+
+                {choices.length > 0 && !loading && (
                     <div style={{marginBottom: '1rem'}}>
-                        {choices.map((choice) => (
+                        {choices.map((choice, index) => (
                             <Button 
                                 key={choice.id}
-                                onClick={() => handleChoice(choice.action, choice.text)}
+                                onClick={() => handleChoice(choice)}
+                                disabled={loading}
                                 style={{
                                     display: "block", 
                                     width: "100%", 
@@ -109,7 +162,7 @@ const Textbox = () => {
                                 onMouseEnter={(e) => e.target.style.background = theme.buttonHover}
                                 onMouseLeave={(e) => e.target.style.background = theme.buttonBg}
                             >
-                                {choice.id}. {choice.text}
+                                {index + 1}. {choice.text}
                             </Button>
                         ))}
                     </div>
@@ -119,9 +172,10 @@ const Textbox = () => {
                     <Form.Group className="d-flex">
                         <Form.Control
                             type="text"
-                            placeholder="Or type command..."
+                            placeholder="Type a command or scene name (intro, forest, cave)..."
                             value={input}
                             onChange={(e) => setInput(e.target.value)}
+                            disabled={loading}
                             style={{
                                 background: theme.inputBg,
                                 color: theme.inputText,
@@ -131,6 +185,7 @@ const Textbox = () => {
                         />
                         <Button 
                             type="submit"
+                            disabled={loading}
                             style={{
                                 background: theme.buttonBg,
                                 color: theme.buttonText,
