@@ -3,6 +3,9 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import Textbox from './components/Textbox.jsx'
 
+
 createRoot(document.getElementById('root')).render(
     <Textbox />
+    // To use the test skeleton instead:
+    // <SimpleTest_test />
 )
