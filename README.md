@@ -262,3 +262,7 @@ deactivate DjangoBackend
 
 <!--This is a link to a seperate coding conventions document / style guide-->
 [Style Guide & Conventions](STYLE.md)
+
+## Docker
+
+This project uses Docker for easy setup and deployment. See [DOCKER.md](DOCKER.md) for instructions on how to run the application using Docker.
