@@ -14,6 +14,11 @@ This project uses Docker to run all services together. Follow these steps to get
    docker-compose -f docker-compose-full.yml up --build
    ```
 
+	**Map Local Ports to VM**
+	```bash
+	ssh -L 8080:localhost:8080 -L 8081:localhost:80 CS_USERNAME@cs506x10      
+	```
+
 2. **Access the application:**
    - Frontend: http://localhost
    - API: http://localhost:8080
