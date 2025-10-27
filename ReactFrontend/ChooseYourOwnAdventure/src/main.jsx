@@ -1,11 +1,11 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
-import Textbox from './components/Textbox.jsx'
+import AppLayout from './components/structural/AppLayout.jsx'
 
 
 createRoot(document.getElementById('root')).render(
-    <Textbox />
+    <AppLayout />
     // To use the test skeleton instead:
     // <SimpleTest_test />
 )

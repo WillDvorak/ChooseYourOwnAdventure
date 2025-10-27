@@ -1,15 +1,16 @@
 services:
   # Database Service
   db:
-    image: mysql:8.0
+    build:
+      context: .
+      dockerfile: Dockerfile.db
+    image: textquest-mysql:latest
     container_name: textquest-mysql
     environment:
       MYSQL_ROOT_PASSWORD: rootpass
       MYSQL_DATABASE: textquest
     ports:
       - "3306:3306"
-    volumes:
-      - ./sql:/docker-entrypoint-initdb.d:ro
     command: ["--default-authentication-plugin=mysql_native_password"]
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-prootpass"]
@@ -28,12 +29,14 @@ services:
     ports:
       - "8080:8080"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/textquest
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/textquest?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: rootpass
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
     depends_on:
       db:
         condition: service_healthy
+    restart: unless-stopped
     networks:
       - textquest-network
 
