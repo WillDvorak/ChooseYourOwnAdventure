@@ -9,20 +9,39 @@ This project uses Docker to run all services together. Follow these steps to get
 
 ## Quick Start
 
-1. **Start all services:**
+1. **Navigate to the project directory:**
+   ```bash
+   cd /u/z/h/zhiweis/private/cs506/Project_10
+   ```
+
+2. **Start all services:**
    ```bash
    docker-compose -f docker-compose-full.yml up --build
    ```
 
-	**Map Local Ports to VM**
-	```bash
-	ssh -L 8080:localhost:8080 -L 8081:localhost:80 CS_USERNAME@cs506x10      
-	```
+3. **Access the application:**
+   - If running **locally**: 
+     - Frontend: http://localhost
+     - API: http://localhost:8080
+   - If running on a **remote server** (via SSH):
+     - You'll need to set up SSH port forwarding (see below)
+
+## Accessing from a Remote Server
+
+If you're accessing the application from a remote server via SSH:
+
+### On your local machine:
+
+1. **Set up SSH port forwarding:**
+   ```bash
+   ssh -N -L 8080:localhost:80 -L 8081:localhost:8080 CS_USERNAME@cs506x10
+   ```
 
 2. **Access the application:**
-   - Frontend: http://localhost
-   - API: http://localhost:8080
-   - Database: localhost:3306
+   - Frontend: http://localhost:3000
+   - API: http://localhost:8081
+
+**Note:** Keep the SSH terminal open while using the application. The connection will close if you close that terminal.
 
 ## Services
 
@@ -86,11 +105,59 @@ docker-compose -f docker-compose-full.yml logs api
 docker-compose -f docker-compose-full.yml ps
 ```
 
+**"Could not connect to the realm" error?** This means the frontend can't reach the backend:
+
+1. **Check if the API is accessible:**
+   ```bash
+   curl http://localhost:8080/api/game/scene/intro
+   ```
+
+2. **Check nginx configuration:**
+   ```bash
+   docker exec textquest-frontend cat /etc/nginx/conf.d/default.conf
+   ```
+
+3. **Restart services:**
+   ```bash
+   docker-compose -f docker-compose-full.yml restart
+   ```
+
+**SSH tunnel "Connection refused"?** The tunnel may have disconnected:
+1. Close the tunnel terminal
+2. Restart with: `ssh -N -L 3000:localhost:80 -L 8081:localhost:8080 zhiweis@<server-ip>`
+3. Refresh your browser at http://localhost:3000
+
+**Port already in use?** Use different ports:
+```bash
+ssh -N -L 3001:localhost:80 -L 8082:localhost:8080 zhiweis@<server-ip>
+```
+Then access at http://localhost:3001
+
 ## Development
 
 To make changes:
 1. Edit your code
-2. Rebuild the affected service: `docker-compose -f docker-compose-full.yml up --build api`
-3. Or restart: `docker-compose -f docker-compose-full.yml restart api`
+2. Rebuild the affected service:
+   ```bash
+   # Rebuild frontend
+   docker-compose -f docker-compose-full.yml build --no-cache frontend
+   docker-compose -f docker-compose-full.yml up -d frontend
+   
+   # Rebuild backend
+   docker-compose -f docker-compose-full.yml build --no-cache api
+   docker-compose -f docker-compose-full.yml up -d api
+   ```
 
-The application should be running at http://localhost
+3. Or restart a service:
+   ```bash
+   docker-compose -f docker-compose-full.yml restart api
+   ```
+
+## Complete Restart (Clean Slate)
+
+If you need to completely rebuild everything:
+```bash
+docker-compose -f docker-compose-full.yml down
+docker-compose -f docker-compose-full.yml build --no-cache
+docker-compose -f docker-compose-full.yml up -d
+```

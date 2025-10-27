@@ -8,7 +8,7 @@ const Textbox = () => {
     const [choices, setChoices] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    const API_BASE = "http://localhost:8080/api/game";
+    const API_BASE = "/api/game";
 
     // Load the intro scene on component mount
     useEffect(() => {

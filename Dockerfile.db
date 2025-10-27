@@ -1,0 +1,6 @@
+FROM mysql:8.0
+
+# Copy only the MySQL-compatible SQL files
+COPY sql/V1__schema.sql /docker-entrypoint-initdb.d/
+COPY sql/V2__seed.sql /docker-entrypoint-initdb.d/
+
