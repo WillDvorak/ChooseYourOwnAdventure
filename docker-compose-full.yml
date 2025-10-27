@@ -44,7 +44,6 @@ services:
   frontend:
     build:
       context: ./ReactFrontend/ChooseYourOwnAdventure
-      dockerfile: Dockerfile
     container_name: textquest-frontend
     ports:
       - "80:80"
@@ -56,3 +55,4 @@ services:
 networks:
   textquest-network:
     driver: bridge
+
