@@ -1,5 +1,5 @@
 import pytest
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock  
 from game_logic import TextQuestGame
 
 @pytest.fixture

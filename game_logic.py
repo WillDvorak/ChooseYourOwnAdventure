@@ -55,7 +55,7 @@ class TextQuestGame:
 
         # Optional: random dynamic flavor text
         if random.random() < 0.15:
-            print("\n💨 A cold wind whispers through the trees...")
+            print("\nA cold wind whispers through the trees...")
 
     def display_scene(self):
         """Render the scene text and available choices."""
@@ -123,7 +123,7 @@ class TextQuestGame:
         self.flags = set(json.loads(row["flags"]))
         self.visited_scenes = set(json.loads(row["visited"]))
         self.current_scene = self.get_scene_by_code(row["scene_code"])
-        print(f"🔄 Loaded save for '{player_id}' at scene '{self.current_scene['code']}'.")
+        print(f"Loaded save for '{player_id}' at scene '{self.current_scene['code']}'.")
         return True
 
 
@@ -140,7 +140,7 @@ class TextQuestGame:
             except ValueError:
                 print("Please enter a number.")
             except KeyboardInterrupt:
-                print("\n💾 Auto-saving before exit...")
+                print("\nAuto-saving before exit...")
                 if self.player_id:
                     self.save_game(self.player_id)
                 break
