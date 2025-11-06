@@ -155,6 +155,92 @@ public class GameService {
     }
     
     /**
+     * Modify HP (for damage or healing)
+     * @param sessionId The game session ID
+     * @param hpChange Positive value for healing, negative for damage
+     * @return Updated game session
+     */
+    public GameSession modifyHp(Long sessionId, int hpChange) {
+        GameSession gameSession = getGameSession(sessionId);
+        
+        if (isGameEnded(gameSession)) {
+            throw new GameEndedException("Game has already ended");
+        }
+        
+        int newHp = gameSession.getHp() + hpChange;
+        // Ensure HP doesn't go below 0 or above maxHp
+        newHp = Math.max(0, Math.min(newHp, gameSession.getMaxHp()));
+        
+        gameSession.setHp(newHp);
+        return gameSessionRepository.save(gameSession);
+    }
+    
+    /**
+     * Set HP to a specific value
+     * @param sessionId The game session ID
+     * @param hp The new HP value (will be clamped between 0 and maxHp)
+     * @return Updated game session
+     */
+    public GameSession setHp(Long sessionId, int hp) {
+        GameSession gameSession = getGameSession(sessionId);
+        
+        if (isGameEnded(gameSession)) {
+            throw new GameEndedException("Game has already ended");
+        }
+        
+        // Clamp HP between 0 and maxHp
+        hp = Math.max(0, Math.min(hp, gameSession.getMaxHp()));
+        gameSession.setHp(hp);
+        
+        return gameSessionRepository.save(gameSession);
+    }
+    
+    /**
+     * Set max HP and optionally adjust current HP
+     * @param sessionId The game session ID
+     * @param maxHp The new max HP value
+     * @param adjustCurrent If true, scales current HP proportionally
+     * @return Updated game session
+     */
+    public GameSession setMaxHp(Long sessionId, int maxHp, boolean adjustCurrent) {
+        GameSession gameSession = getGameSession(sessionId);
+        
+        if (isGameEnded(gameSession)) {
+            throw new GameEndedException("Game has already ended");
+        }
+        
+        if (maxHp <= 0) {
+            throw new IllegalArgumentException("Max HP must be greater than 0");
+        }
+        
+        int oldMaxHp = gameSession.getMaxHp();
+        gameSession.setMaxHp(maxHp);
+        
+        // Optionally scale current HP proportionally
+        if (adjustCurrent && oldMaxHp > 0) {
+            double ratio = (double) maxHp / oldMaxHp;
+            int newHp = (int) Math.round(gameSession.getHp() * ratio);
+            gameSession.setHp(Math.min(newHp, maxHp));
+        } else {
+            // Ensure current HP doesn't exceed new max
+            if (gameSession.getHp() > maxHp) {
+                gameSession.setHp(maxHp);
+            }
+        }
+        
+        return gameSessionRepository.save(gameSession);
+    }
+    
+    /**
+     * Check if player is dead (HP <= 0)
+     */
+    @Transactional(readOnly = true)
+    public boolean isPlayerDead(Long sessionId) {
+        GameSession gameSession = getGameSession(sessionId);
+        return gameSession.getHp() <= 0;
+    }
+    
+    /**
      * End a game session
      */
     public void endGameSession(Long sessionId) {

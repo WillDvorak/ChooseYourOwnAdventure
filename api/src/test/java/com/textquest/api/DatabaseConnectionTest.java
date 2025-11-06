@@ -14,7 +14,9 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @TestPropertySource(properties = {
-    "spring.flyway.enabled=true"
+    "spring.flyway.enabled=true",
+    "spring.flyway.baseline-on-migrate=true",
+    "spring.flyway.validate-on-migrate=false"
 })
 class DatabaseConnectionTest {
 

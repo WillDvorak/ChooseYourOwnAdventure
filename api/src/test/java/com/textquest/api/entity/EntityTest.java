@@ -93,6 +93,8 @@ class EntityTest {
         assertEquals("TestPlayer", savedSession.getPlayerName());
         assertEquals("intro", savedSession.getCurrentSceneCode());
         assertEquals("{\"torch\": true, \"gold\": false}", savedSession.getFlagsJson());
+        assertEquals(100, savedSession.getHp());
+        assertEquals(100, savedSession.getMaxHp());
         assertNotNull(savedSession.getCreatedAt());
         assertNotNull(savedSession.getUpdatedAt());
         
@@ -100,6 +102,13 @@ class EntityTest {
         List<GameSession> sessions = gameSessionRepository.findByPlayerName("TestPlayer");
         assertEquals(1, sessions.size());
         assertEquals("TestPlayer", sessions.get(0).getPlayerName());
+        
+        // Test HP modification
+        savedSession.setHp(75);
+        savedSession.setMaxHp(150);
+        GameSession updatedSession = gameSessionRepository.save(savedSession);
+        assertEquals(75, updatedSession.getHp());
+        assertEquals(150, updatedSession.getMaxHp());
     }
 
     @Test
