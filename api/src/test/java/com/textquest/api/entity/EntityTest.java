@@ -9,6 +9,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -32,13 +33,9 @@ class EntityTest {
 
     @Test
     void testSceneEntity() {
-        // Create a new scene
         Scene scene = new Scene("test_scene", "Test Scene", "This is a test scene body", false);
-        
-        // Save the scene
         Scene savedScene = sceneRepository.save(scene);
-        
-        // Verify the scene was saved
+
         assertNotNull(savedScene.getId());
         assertEquals("test_scene", savedScene.getCode());
         assertEquals("Test Scene", savedScene.getTitle());
@@ -46,8 +43,7 @@ class EntityTest {
         assertFalse(savedScene.getIsTerminal());
         assertNotNull(savedScene.getCreatedAt());
         assertNotNull(savedScene.getUpdatedAt());
-        
-        // Test finding by code
+
         Optional<Scene> foundScene = sceneRepository.findByCode("test_scene");
         assertTrue(foundScene.isPresent());
         assertEquals("test_scene", foundScene.get().getCode());
@@ -55,17 +51,12 @@ class EntityTest {
 
     @Test
     void testChoiceEntity() {
-        // Create a scene first
         Scene scene = new Scene("parent_scene", "Parent Scene", "Parent scene body", false);
         Scene savedScene = sceneRepository.save(scene);
-        
-        // Create a choice
+
         Choice choice = new Choice(savedScene, "Go to test", "test_scene", null, "test_flag");
-        
-        // Save the choice
         Choice savedChoice = choiceRepository.save(choice);
-        
-        // Verify the choice was saved
+
         assertNotNull(savedChoice.getId());
         assertEquals("Go to test", savedChoice.getLabel());
         assertEquals("test_scene", savedChoice.getTargetSceneCode());
@@ -73,8 +64,7 @@ class EntityTest {
         assertEquals("test_flag", savedChoice.getSetsFlag());
         assertNotNull(savedChoice.getCreatedAt());
         assertNotNull(savedChoice.getUpdatedAt());
-        
-        // Test finding choices by scene
+
         List<Choice> choices = choiceRepository.findBySceneCode("parent_scene");
         assertEquals(1, choices.size());
         assertEquals("Go to test", choices.get(0).getLabel());
@@ -82,21 +72,16 @@ class EntityTest {
 
     @Test
     void testGameSessionEntity() {
-        // Create a game session
         GameSession gameSession = new GameSession("TestPlayer", "intro", "{\"torch\": true, \"gold\": false}");
-        
-        // Save the game session
         GameSession savedSession = gameSessionRepository.save(gameSession);
-        
-        // Verify the game session was saved
+
         assertNotNull(savedSession.getId());
         assertEquals("TestPlayer", savedSession.getPlayerName());
         assertEquals("intro", savedSession.getCurrentSceneCode());
         assertEquals("{\"torch\": true, \"gold\": false}", savedSession.getFlagsJson());
         assertNotNull(savedSession.getCreatedAt());
         assertNotNull(savedSession.getUpdatedAt());
-        
-        // Test finding by player name
+
         List<GameSession> sessions = gameSessionRepository.findByPlayerName("TestPlayer");
         assertEquals(1, sessions.size());
         assertEquals("TestPlayer", sessions.get(0).getPlayerName());
@@ -104,53 +89,44 @@ class EntityTest {
 
     @Test
     void testSceneChoiceRelationship() {
-        // Create a scene
         Scene scene = new Scene("relationship_test", "Relationship Test", "Testing relationships", false);
         Scene savedScene = sceneRepository.save(scene);
-        
-        // Create choices for the scene
+
         Choice choice1 = new Choice(savedScene, "Choice 1", "scene1", null, "flag1");
         Choice choice2 = new Choice(savedScene, "Choice 2", "scene2", "flag1", "flag2");
-        
         choiceRepository.save(choice1);
         choiceRepository.save(choice2);
-        
-        // Test the relationship by finding choices for the scene
+
         List<Choice> choices = choiceRepository.findBySceneCode("relationship_test");
         assertEquals(2, choices.size());
-        
-        // Verify choice details
         assertTrue(choices.stream().anyMatch(c -> c.getLabel().equals("Choice 1")));
         assertTrue(choices.stream().anyMatch(c -> c.getLabel().equals("Choice 2")));
     }
 
     @Test
     void testRepositoryQueries() {
-        // Create test data
         Scene scene1 = new Scene("scene1", "Scene 1", "First scene", false);
         Scene scene2 = new Scene("scene2", "Scene 2", "Second scene", true);
         sceneRepository.save(scene1);
         sceneRepository.save(scene2);
-        
+
         GameSession session1 = new GameSession("Player1", "scene1", "{\"torch\": true}");
         GameSession session2 = new GameSession("Player2", "scene2", "{\"gold\": true}");
         gameSessionRepository.save(session1);
         gameSessionRepository.save(session2);
-        
-        // Test scene queries
+
         List<Scene> terminalScenes = sceneRepository.findByIsTerminalTrue();
         assertTrue(terminalScenes.size() >= 1);
         assertTrue(terminalScenes.stream().anyMatch(s -> s.getCode().equals("scene2")));
-        
+
         List<Scene> nonTerminalScenes = sceneRepository.findByIsTerminalFalse();
         assertTrue(nonTerminalScenes.size() >= 1);
         assertTrue(nonTerminalScenes.stream().anyMatch(s -> s.getCode().equals("scene1")));
-        
-        // Test game session queries
+
         List<GameSession> player1Sessions = gameSessionRepository.findByPlayerName("Player1");
         assertEquals(1, player1Sessions.size());
         assertEquals("scene1", player1Sessions.get(0).getCurrentSceneCode());
-        
+
         List<GameSession> scene2Sessions = gameSessionRepository.findByCurrentSceneCode("scene2");
         assertEquals(1, scene2Sessions.size());
         assertEquals("Player2", scene2Sessions.get(0).getPlayerName());
@@ -158,17 +134,95 @@ class EntityTest {
 
     @Test
     void testEntityValidation() {
-        // Test that required fields are enforced
         Scene scene = new Scene();
         scene.setCode("test");
-        // Missing title and body - should still save but test the setters
         scene.setTitle("Test Title");
         scene.setBody("Test Body");
-        
+
         Scene savedScene = sceneRepository.save(scene);
         assertNotNull(savedScene.getId());
         assertEquals("test", savedScene.getCode());
         assertEquals("Test Title", savedScene.getTitle());
         assertEquals("Test Body", savedScene.getBody());
+    }
+
+
+    @Test
+    void testSceneUpdateTimestamps() throws InterruptedException {
+        Scene scene = new Scene("update_test", "Initial Title", "Initial Body", false);
+        Scene saved = sceneRepository.save(scene);
+
+        LocalDateTime originalUpdatedAt = saved.getUpdatedAt();
+        Thread.sleep(10); // ensure timestamp difference
+        saved.setTitle("Updated Title");
+        Scene updated = sceneRepository.save(saved);
+
+        assertTrue(updated.getUpdatedAt().isAfter(originalUpdatedAt));
+        assertEquals("Updated Title", updated.getTitle());
+    }
+
+    @Test
+    void testChoiceTargetSceneUpdate() {
+        Scene parent = new Scene("choice_parent", "Choice Parent", "Body", false);
+        sceneRepository.save(parent);
+
+        Choice choice = new Choice(parent, "Old Choice", "old_scene", null, null);
+        choiceRepository.save(choice);
+
+        choice.setTargetSceneCode("new_scene");
+        Choice updated = choiceRepository.save(choice);
+
+        assertEquals("new_scene", updated.getTargetSceneCode());
+    }
+
+    @Test
+    void testDeleteSceneDoesNotCascadeToChoices() {
+        Scene scene = new Scene("cascade_test", "Cascade Test", "Body", false);
+        Scene savedScene = sceneRepository.save(scene);
+
+        Choice choice = new Choice(savedScene, "Delete Test", "other_scene", null, null);
+        choiceRepository.save(choice);
+
+        sceneRepository.delete(savedScene);
+
+        List<Choice> remainingChoices = choiceRepository.findAll();
+        assertFalse(remainingChoices.isEmpty(), "Choices should not be deleted when scene is removed");
+    }
+
+    @Test
+    void testFindNonexistentEntities() {
+        Optional<Scene> missingScene = sceneRepository.findByCode("does_not_exist");
+        List<GameSession> missingSession = gameSessionRepository.findByPlayerName("NoSuchPlayer");
+        List<Choice> missingChoices = choiceRepository.findBySceneCode("no_scene");
+
+        assertTrue(missingScene.isEmpty());
+        assertTrue(missingSession.isEmpty());
+        assertTrue(missingChoices.isEmpty());
+    }
+
+    @Test
+    void testGameSessionUpdateSceneAndFlags() {
+        GameSession session = new GameSession("UpdatePlayer", "scene_old", "{\"key\": false}");
+        gameSessionRepository.save(session);
+
+        session.setCurrentSceneCode("scene_new");
+        session.setFlagsJson("{\"key\": true}");
+        GameSession updated = gameSessionRepository.save(session);
+
+        assertEquals("scene_new", updated.getCurrentSceneCode());
+        assertEquals("{\"key\": true}", updated.getFlagsJson());
+    }
+
+    @Test
+    void testMultipleSessionsPerPlayer() {
+        GameSession s1 = new GameSession("MultiPlayer", "intro", "{}");
+        GameSession s2 = new GameSession("MultiPlayer", "second", "{}");
+        gameSessionRepository.save(s1);
+        gameSessionRepository.save(s2);
+
+        List<GameSession> sessions = gameSessionRepository.findByPlayerName("MultiPlayer");
+        assertEquals(2, sessions.size());
+        assertTrue(sessions.stream().anyMatch(s -> s.getCurrentSceneCode().equals("intro")));
+        assertTrue(sessions.stream().anyMatch(s -> s.getCurrentSceneCode().equals("second")));
     }
 }
