@@ -47,6 +47,8 @@ CREATE TABLE IF NOT EXISTS game_sessions (
   player_name         VARCHAR(64)     NOT NULL,
   current_scene_code  VARCHAR(64)     NOT NULL,       -- scenes.code
   flags_json          JSON            NOT NULL,       -- stores inventory/flags
+  hp                  INT             NOT NULL DEFAULT 100,
+  max_hp              INT             NOT NULL DEFAULT 100,
   created_at          TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at          TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
