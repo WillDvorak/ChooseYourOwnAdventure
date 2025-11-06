@@ -1,4 +1,4 @@
-import React from "react";
+import { useState } from "react";
 import { Container, Row, Col, Card } from "react-bootstrap";
 
 import Textbox from "../content/Textbox";
@@ -25,14 +25,40 @@ const theme = {
 
 
 export default function AppLayout() {
+
+    // Passes down scene information to displaybox
+    // Passes setSceneMeta to textbox
+    const [sceneInfo, setSceneInfo] = useState(null)
+    // Passes down inventory information to inventory box
+    // Passes setInventory to Textbox 
+    const [inventory, setInventory] = useState([])
+
+    /**
+     * Handles giving or taking an item from the user
+     *
+     * @param {string} item - The item to add or take from inventory
+     * @param {boolean } isGiving - true if giving item to player, false if taking away
+     * @returns {void} - updates inventory state variable
+     */
+    function handleSetInventory(item, isGiving = true) {
+        isGiving ? setInventory([...inventory, item])
+        :
+        setInventory((prev) => {
+            const newInv = prev.filter(invItem => invItem != item)
+            setInventory(newInv)
+        })
+
+    }
+
+
     return <Container fluid>
         <Row>
             <Col lg={3} style={{padding: '0px'}}>
-                <DisplayBox theme={theme}/>
-                <InventoryBox theme={theme} />
+                <DisplayBox theme={theme} sceneInfo={sceneInfo}/>
+                <InventoryBox theme={theme} inventory={inventory} />
             </Col>
             <Col lg={9} style={{padding: '0px'}}>
-                <Textbox theme={theme}/>
+                <Textbox theme={theme} onSceneChange={setSceneInfo} handleInventory={handleSetInventory} />
             </Col>
         </Row>
     </Container>

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Container, Card, Form, Button } from "react-bootstrap"
+import useStorage from "../../hooks/useStorage";
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 const Textbox = (props) => {
@@ -29,6 +30,10 @@ const Textbox = (props) => {
             // Set the scene body as the message
             setMessages((prev) => [...prev, data.body]);
 
+            // Set sceneInfo for displaybox
+            props.onSceneChange(data)
+
+
             // Set choices from the scene
             if (data.choices && data.choices.length > 0) {
                 const formattedChoices = data.choices.map((choice) => ({
@@ -39,6 +44,8 @@ const Textbox = (props) => {
                     setsFlag: choice.setsFlag
                 }));
                 setChoices(formattedChoices);
+
+
             } else {
                 // No choices means it's a terminal scene
                 setChoices([]);
@@ -51,44 +58,34 @@ const Textbox = (props) => {
         }
     };
 
-    // Dark Fantasy Theme Colors
-    // const theme = {
-    //     background: 'linear-gradient(135deg, #1a0933 0%, #2d1b4e 100%)',
-    //     containerBorder: '3px solid #d4af37',
-    //     cardBg: 'rgba(13, 5, 26, 0.9)',
-    //     messageText: '#f0e6d2',
-    //     messageBorder: '1px solid #4a3775',
-    //     messageBg: 'rgba(74, 55, 117, 0.3)',
-    //     buttonBg: '#d4af37',
-    //     buttonText: '#1a0933',
-    //     buttonHover: '#ffd700',
-    //     inputBg: 'rgba(74, 55, 117, 0.5)',
-    //     inputText: '#f0e6d2',
-    //     inputBorder: '#d4af37'
-    // };
-
     const handleChoice = async (choice) => {
+        // alert(JSON.stringify(choice, null, 2));
+        
         setMessages((prev) => [...prev, `> ${choice.text}`]);
 
+
+        if (choice.setsFlag != "") {
+            props.handleInventory(choice.setsFlag, true)
+        }
         // Load the target scene
         await loadScene(choice.targetScene);
     }
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        if (!input.trim()) return;
+    // const handleSubmit = async (e) => {
+    //     e.preventDefault();
+    //     if (!input.trim()) return;
 
-        const userInput = input.trim().toLowerCase();
-        setMessages((prev) => [...prev, `> ${input.trim()}`]);
-        setInput("");
+    //     const userInput = input.trim().toLowerCase();
+    //     setMessages((prev) => [...prev, `> ${input.trim()}`]);
+    //     setInput("");
 
-        // Check if user wants to load a different scene by code
-        if (["intro", "forest", "cave", "treasure"].includes(userInput)) {
-            await loadScene(userInput);
-        } else {
-            setMessages((prev) => [...prev, `Unknown command. Try scene names like "intro", "forest", "cave".`]);
-        }
-    }
+    //     // Check if user wants to load a different scene by code
+    //     if (["intro", "forest", "cave", "treasure"].includes(userInput)) {
+    //         await loadScene(userInput);
+    //     } else {
+    //         setMessages((prev) => [...prev, `Unknown command. Try scene names like "intro", "forest", "cave".`]);
+    //     }
+    // }
 
     return (
         // <Container 
@@ -109,7 +106,7 @@ const Textbox = (props) => {
                 borderRadius: '12px',
                 padding: '1.5rem'
             }}>
-            <div style={{ maxHeight: '60vh', overflowY: 'auto', marginBottom: '1rem' }}>
+            <div style={{ maxHeight: '80vh', overflowY: 'auto', marginBottom: '1rem' }}>
                 {messages.map((msg, i) => (
                     <p
                         style={{
@@ -174,7 +171,7 @@ const Textbox = (props) => {
                 </div>
             )}
 
-            <Form onSubmit={handleSubmit}>
+            {/* <Form onSubmit={handleSubmit}>
                 <Form.Group className="d-flex">
                     <Form.Control
                         type="text"
@@ -203,7 +200,7 @@ const Textbox = (props) => {
                         Send
                     </Button>
                 </Form.Group>
-            </Form>
+            </Form> */}
         </Card>
     );
 }

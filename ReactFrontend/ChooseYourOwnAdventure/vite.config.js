@@ -16,4 +16,12 @@ export default defineConfig({
     setupFiles: './src/test/setup.js',
     css: true,
   },
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://localhost:8080', // or the VM-forwarded host:port
+        changeOrigin: true,
+      },
+    },
+  },
 })

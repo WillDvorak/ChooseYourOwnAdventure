@@ -5,7 +5,8 @@ export default function InventoryBox(props) {
 
 
 
-    const hardCodeInventory = ['torch', 'rock', 'stick', 'etc'];
+    
+    const inventory = props.inventory ?? []
     let placeholderImg = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ3vrTUU3CKbUDThpm8aZzFXdTmai6PodNfXA&s'
 
     return (
@@ -17,11 +18,13 @@ export default function InventoryBox(props) {
                 color: props.theme.messageText,
                 textAlign: "center",
                 fontFamily: props.theme.fontFamily,
+                minHeight: 300,
             }}
         >
             <h1>Inventory:</h1>
-            <Row xs={1} sm={2} className="g-3 p-3">
-                {hardCodeInventory.map((item, i) => (
+            {inventory.length > 0 ? 
+                <Row xs={1} sm={2} className="g-3 p-3">
+                {inventory.map((item, i) => (
                     <Col key={i}>
                         <Card className="h-100">
                             <Card.Body className="d-flex align-items-center gap-3">
@@ -35,8 +38,11 @@ export default function InventoryBox(props) {
                             </Card.Body>
                         </Card>
                     </Col>
-                ))}
+                ))
+                }
             </Row>
+            :
+            <p>You have nothing in your inventory...</p>}
         </Card>
     );
 }
