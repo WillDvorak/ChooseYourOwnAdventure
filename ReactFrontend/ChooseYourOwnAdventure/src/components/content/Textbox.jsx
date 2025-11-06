@@ -7,18 +7,21 @@ const Textbox = (props) => {
     const [input, setInput] = useState("");
     const [choices, setChoices] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [sceneTitle, setSceneTitle] = useState("");
 
     const API_BASE = "/api/game";
 
-    // Load the intro scene on component mount
+    // Load the intro scene on component mount (only if sessionId is available)
     useEffect(() => {
-        loadScene("intro");
-    }, []);
+        if (props.sessionId) {
+            loadInitialScene();
+        }
+    }, [props.sessionId]);
 
-    const loadScene = async (sceneCode) => {
+    const loadInitialScene = async () => {
         setLoading(true);
         try {
-            const response = await fetch(`${API_BASE}/scene/${sceneCode}`);
+            const response = await fetch(`${API_BASE}/session/${props.sessionId}`);
 
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
@@ -26,12 +29,13 @@ const Textbox = (props) => {
 
             const data = await response.json();
 
-            // Set the scene body as the message
-            setMessages((prev) => [...prev, data.body]);
+            // Set the scene title and body
+            setSceneTitle(data.scene.title || "");
+            setMessages([data.scene.body]);
 
             // Set choices from the scene
-            if (data.choices && data.choices.length > 0) {
-                const formattedChoices = data.choices.map((choice) => ({
+            if (data.scene.choices && data.scene.choices.length > 0) {
+                const formattedChoices = data.scene.choices.map((choice) => ({
                     id: choice.id,
                     text: choice.label,
                     targetScene: choice.targetSceneCode,
@@ -42,6 +46,11 @@ const Textbox = (props) => {
             } else {
                 // No choices means it's a terminal scene
                 setChoices([]);
+            }
+
+            // Update inventory in parent
+            if (props.onInventoryUpdate && data.flags) {
+                props.onInventoryUpdate(data.flags);
             }
         } catch (error) {
             console.error('Error loading scene:', error);
@@ -68,10 +77,58 @@ const Textbox = (props) => {
     // };
 
     const handleChoice = async (choice) => {
-        setMessages((prev) => [...prev, `> ${choice.text}`]);
+        if (!props.sessionId) {
+            console.error('No session ID available');
+            return;
+        }
 
-        // Load the target scene
-        await loadScene(choice.targetScene);
+        setMessages((prev) => [...prev, `> ${choice.text}`]);
+        setLoading(true);
+
+        try {
+            const response = await fetch(`${API_BASE}/session/${props.sessionId}/choice`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    targetSceneCode: choice.targetScene,
+                    setsFlag: choice.setsFlag || ""
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+
+            // Update scene
+            setSceneTitle(data.scene.title || "");
+            setMessages((prev) => [...prev, data.scene.body]);
+
+            // Update choices
+            if (data.scene.choices && data.scene.choices.length > 0) {
+                const formattedChoices = data.scene.choices.map((c) => ({
+                    id: c.id,
+                    text: c.label,
+                    targetScene: c.targetSceneCode,
+                    requiresFlag: c.requiresFlag,
+                    setsFlag: c.setsFlag
+                }));
+                setChoices(formattedChoices);
+            } else {
+                setChoices([]);
+            }
+
+            // Update inventory in parent component
+            if (props.onInventoryUpdate && data.flags) {
+                props.onInventoryUpdate(data.flags);
+            }
+        } catch (error) {
+            console.error('Error making choice:', error);
+            setMessages((prev) => [...prev, "⚠️ Error: Could not process your choice."]);
+        } finally {
+            setLoading(false);
+        }
     }
 
     const handleSubmit = async (e) => {
@@ -109,6 +166,19 @@ const Textbox = (props) => {
                 borderRadius: '12px',
                 padding: '1.5rem'
             }}>
+            {sceneTitle && (
+                <h2 style={{
+                    color: props.theme.buttonBg,
+                    fontFamily: 'Georgia, serif',
+                    fontSize: '1.8rem',
+                    marginBottom: '1rem',
+                    textAlign: 'center',
+                    borderBottom: `2px solid ${props.theme.buttonBg}`,
+                    paddingBottom: '0.5rem'
+                }}>
+                    {sceneTitle}
+                </h2>
+            )}
             <div style={{ maxHeight: '60vh', overflowY: 'auto', marginBottom: '1rem' }}>
                 {messages.map((msg, i) => (
                     <p

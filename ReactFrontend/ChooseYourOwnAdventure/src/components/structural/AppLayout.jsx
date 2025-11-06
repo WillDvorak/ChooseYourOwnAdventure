@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Container, Row, Col, Card } from "react-bootstrap";
 
 import Textbox from "../content/Textbox";
@@ -25,14 +25,76 @@ const theme = {
 
 
 export default function AppLayout() {
+    const [sessionId, setSessionId] = useState(null);
+    const [inventory, setInventory] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        // Start a new game session on mount
+        const startSession = async () => {
+            try {
+                const response = await fetch('/api/game/session/start', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ playerName: 'Player' })
+                });
+                
+                const data = await response.json();
+                setSessionId(data.sessionId);
+                
+                // Initialize inventory from flags
+                const flagsArray = Object.keys(data.flags || {}).filter(f => data.flags[f]);
+                setInventory(flagsArray);
+            } catch (error) {
+                console.error('Error starting session:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        
+        startSession();
+    }, []);
+
+    const handleInventoryUpdate = (flags) => {
+        // Convert flags object to array of flag names where value is true
+        const flagsArray = Object.keys(flags || {}).filter(f => flags[f]);
+        setInventory(flagsArray);
+    };
+
+    if (loading) {
+        return (
+            <Container fluid style={{ 
+                height: '100vh', 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center',
+                background: theme.background,
+                color: theme.messageText 
+            }}>
+                <div style={{ textAlign: 'center' }}>
+                    <div className="spinner-border text-warning" role="status">
+                        <span className="visually-hidden">Loading...</span>
+                    </div>
+                    <p style={{ marginTop: '1rem', fontFamily: theme.fontFamily }}>
+                        Initializing your adventure...
+                    </p>
+                </div>
+            </Container>
+        );
+    }
+
     return <Container fluid>
         <Row>
             <Col lg={3} style={{padding: '0px'}}>
                 <DisplayBox theme={theme}/>
-                <InventoryBox theme={theme} />
+                <InventoryBox theme={theme} inventory={inventory} />
             </Col>
             <Col lg={9} style={{padding: '0px'}}>
-                <Textbox theme={theme}/>
+                <Textbox 
+                    theme={theme} 
+                    sessionId={sessionId}
+                    onInventoryUpdate={handleInventoryUpdate}
+                />
             </Col>
         </Row>
     </Container>

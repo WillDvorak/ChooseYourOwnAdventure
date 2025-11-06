@@ -2,7 +2,23 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import { describe, test, expect, beforeEach, vi } from 'vitest';
 import userEvent from '@testing-library/user-event';
-import Textbox from './Textbox';
+import Textbox from './content/Textbox';
+
+// Mock theme object (matching the one used in AppLayout)
+const mockTheme = {
+  background: 'linear-gradient(135deg, #1a0933 0%, #2d1b4e 100%)',
+  containerBorder: '3px solid #d4af37',
+  cardBg: 'rgba(13, 5, 26, 0.9)',
+  messageText: '#f0e6d2',
+  messageBorder: '1px solid #4a3775',
+  messageBg: 'rgba(74, 55, 117, 0.3)',
+  buttonBg: '#d4af37',
+  buttonText: '#1a0933',
+  buttonHover: '#ffd700',
+  inputBg: 'rgba(74, 55, 117, 0.5)',
+  inputText: '#f0e6d2',
+  inputBorder: '#d4af37'
+};
 
 // This runs before each test
 beforeEach(() => {
@@ -26,7 +42,7 @@ describe('Textbox Component', () => {
     });
 
     // Render the component
-    render(<Textbox />);
+    render(<Textbox theme={mockTheme} />);
     
     // Wait for the loading to complete (this handles the async state updates)
     await waitFor(() => {
@@ -52,7 +68,7 @@ describe('Textbox Component', () => {
     });
 
     // Render the component
-    render(<Textbox />);
+    render(<Textbox theme={mockTheme} />);
     
     // Wait for the API call to complete and text to appear
     await waitFor(() => {
@@ -79,7 +95,7 @@ describe('Textbox Component', () => {
       })
     });
 
-    render(<Textbox />);
+    render(<Textbox theme={mockTheme} />);
     
     // Wait for choices to appear - use regex for flexible matching
     // The /i flag makes it case-insensitive
@@ -105,7 +121,7 @@ describe('Textbox Component', () => {
     // Create a promise that never resolves (simulates slow network)
     global.fetch.mockReturnValueOnce(new Promise(() => {}));
 
-    render(<Textbox />);
+    render(<Textbox theme={mockTheme} />);
     
     // The loading message should be visible
     expect(screen.getByText(/Consulting the ancient scrolls/i)).toBeInTheDocument();
@@ -124,7 +140,7 @@ describe('Textbox Component', () => {
       json: async () => ({ error: 'Server error' })
     });
 
-    render(<Textbox />);
+    render(<Textbox theme={mockTheme} />);
     
     // Wait for error message to appear
     await waitFor(() => {
@@ -164,7 +180,7 @@ describe('Textbox Component', () => {
       })
     });
 
-    render(<Textbox />);
+    render(<Textbox theme={mockTheme} />);
     
     // Wait for buttons to appear
     await waitFor(() => {
@@ -176,16 +192,19 @@ describe('Textbox Component', () => {
     await user.click(leftButton);
     
     // After clicking, verify the new scene loaded
-    // (Note: the component replaces messages when loading a new scene)
+    // (Note: the component appends messages, keeping history)
     await waitFor(() => {
       expect(screen.getByText(/You went left and found a treasure!/i)).toBeInTheDocument();
     });
     
-    // Verify the scene text is displayed
+    // Verify the new scene text is displayed
     expect(screen.getByText(/You went left and found a treasure!/i)).toBeInTheDocument();
     
-    // Verify the old scene is gone (replaced by new one)
-    expect(screen.queryByText(/You are at a crossroads/i)).not.toBeInTheDocument();
+    // Verify message history is kept (old scene should still be visible)
+    expect(screen.getByText(/You are at a crossroads/i)).toBeInTheDocument();
+    
+    // Verify the user's choice is also displayed
+    expect(screen.getByText(/> Go left/i)).toBeInTheDocument();
   });
   
 });
