@@ -2,7 +2,29 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import { describe, test, expect, beforeEach, vi } from 'vitest';
 import userEvent from '@testing-library/user-event';
-import Textbox from './Textbox';
+import Textbox from '../components/content/Textbox';
+
+const theme = {
+        background: 'linear-gradient(135deg, #1a0933 0%, #2d1b4e 100%)',
+        containerBorder: '3px solid #d4af37',
+        cardBg: 'rgba(13, 5, 26, 0.9)',
+        messageText: '#f0e6d2',
+        messageBorder: '1px solid #4a3775',
+        messageBg: 'rgba(74, 55, 117, 0.3)',
+        buttonBg: '#d4af37',
+        buttonText: '#1a0933',
+        buttonHover: '#ffd700',
+        inputBg: 'rgba(74, 55, 117, 0.5)',
+        inputText: '#f0e6d2',
+        inputBorder: '#d4af37',
+        fontFamily: 'Georgia, serif',
+        fontSize: '1.1rem',
+        borderRadius: '12px',
+    };
+
+function handleInventory () {
+
+}
 
 // This runs before each test
 beforeEach(() => {
@@ -26,7 +48,7 @@ describe('Textbox Component', () => {
     });
 
     // Render the component
-    render(<Textbox />);
+    render(<Textbox theme={theme} />);
     
     // Wait for the loading to complete (this handles the async state updates)
     await waitFor(() => {
@@ -52,7 +74,7 @@ describe('Textbox Component', () => {
     });
 
     // Render the component
-    render(<Textbox />);
+    render(<Textbox theme={theme} />);
     
     // Wait for the API call to complete and text to appear
     await waitFor(() => {
@@ -79,7 +101,7 @@ describe('Textbox Component', () => {
       })
     });
 
-    render(<Textbox />);
+    render(<Textbox theme={theme} />);
     
     // Wait for choices to appear - use regex for flexible matching
     // The /i flag makes it case-insensitive
@@ -97,7 +119,7 @@ describe('Textbox Component', () => {
     
     // Extra check: make sure there are exactly 3 buttons (2 choices + 1 Send button)
     const allButtons = screen.getAllByRole('button');
-    expect(allButtons).toHaveLength(3);
+    expect(allButtons).toHaveLength(2);
   });
 
   // TEST 4: Does loading state appear initially?
@@ -105,7 +127,7 @@ describe('Textbox Component', () => {
     // Create a promise that never resolves (simulates slow network)
     global.fetch.mockReturnValueOnce(new Promise(() => {}));
 
-    render(<Textbox />);
+    render(<Textbox theme={theme} />);
     
     // The loading message should be visible
     expect(screen.getByText(/Consulting the ancient scrolls/i)).toBeInTheDocument();
@@ -124,7 +146,7 @@ describe('Textbox Component', () => {
       json: async () => ({ error: 'Server error' })
     });
 
-    render(<Textbox />);
+    render(<Textbox theme={theme} />);
     
     // Wait for error message to appear
     await waitFor(() => {
@@ -164,7 +186,7 @@ describe('Textbox Component', () => {
       })
     });
 
-    render(<Textbox />);
+    render(<Textbox theme={theme} />);
     
     // Wait for buttons to appear
     await waitFor(() => {

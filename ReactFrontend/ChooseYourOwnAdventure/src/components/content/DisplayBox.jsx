@@ -1,4 +1,4 @@
-import { Card, Container } from "react-bootstrap"
+import { Card } from "react-bootstrap"
 
 export default function DisplayBox(props) {
 
@@ -12,11 +12,23 @@ export default function DisplayBox(props) {
             textAlign: "center",
             fontFamily: props.theme.fontFamily,
         }}>
-        <h2>HARDCODE: Biome</h2>
-        <h3>HARDCODE</h3>
-        <p>HARDCODE</p>
-        <p>HARDCODE</p>
-        <p>HARDCODE</p>
+        {props.sceneInfo ? <>
+            <h2>{props.sceneInfo.title}</h2>
+            <h3>{props.sceneInfo.code}</h3>
+            <p>HARDCODE</p>
+            <p>HARDCODE</p>
+            <p>HARDCODE</p>
+        </>
+        :
+        <>
+            <h2>HARDCODE</h2>
+            <h3>HARDCODE</h3>
+            <p>HARDCODE</p>
+            <p>HARDCODE</p>
+            <p>HARDCODE</p>
+        </>
+        }
+        
     </Card>
 
 
