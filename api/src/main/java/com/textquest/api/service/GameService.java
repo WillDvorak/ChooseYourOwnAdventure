@@ -86,10 +86,19 @@ public class GameService {
     /**
      * Get available choices for the current scene based on player flags
      */
-    @Transactional(readOnly = true)
+    @Transactional
     public List<Choice> getAvailableChoices(Long sessionId) {
         GameSession gameSession = getGameSession(sessionId);
         Map<String, Object> playerFlags = parseFlags(gameSession.getFlagsJson());
+        
+        // Update relic count flag if player is at Astral Gate and persist it
+        if ("astral_gate".equals(gameSession.getCurrentSceneCode())) {
+            updateRelicCountFlag(playerFlags);
+            // Persist the updated flags
+            gameSession.setFlagsJson(serializeFlags(playerFlags));
+            gameSessionRepository.save(gameSession);
+        }
+        
         return sceneService.getAvailableChoices(gameSession.getCurrentSceneCode(), playerFlags);
     }
     
@@ -123,6 +132,12 @@ public class GameService {
         
         // Update game session
         gameSession.setCurrentSceneCode(choice.getTargetSceneCode());
+        
+        // Check if player reached Astral Gate and has enough relics for restoration
+        if ("astral_gate".equals(choice.getTargetSceneCode())) {
+            updateRelicCountFlag(updatedFlags);
+        }
+        
         gameSession.setFlagsJson(serializeFlags(updatedFlags));
         
         return gameSessionRepository.save(gameSession);
@@ -203,6 +218,34 @@ public class GameService {
         } catch (JsonProcessingException e) {
             // If serialization fails, return empty JSON object
             return "{}";
+        }
+    }
+    
+    /**
+     * Count relics and set flag if player has 3+ relics
+     * Relics include: forest_sigil, firebrand, portal_shard, reality_shard, ancient_artifacts, water_power
+     */
+    private void updateRelicCountFlag(Map<String, Object> flags) {
+        int relicCount = 0;
+        
+        // List of relic flags
+        String[] relicFlags = {
+            "forest_sigil", "firebrand", "portal_shard", "reality_shard", 
+            "ancient_artifacts", "water_power"
+        };
+        
+        // Count relics
+        for (String relic : relicFlags) {
+            if (flags.containsKey(relic) && Boolean.TRUE.equals(flags.get(relic))) {
+                relicCount++;
+            }
+        }
+        
+        // Set flag if player has 3+ relics (required for Restore All Realms ending)
+        if (relicCount >= 3) {
+            flags.put("has_3_relics", true);
+        } else {
+            flags.put("has_3_relics", false);
         }
     }
 }
