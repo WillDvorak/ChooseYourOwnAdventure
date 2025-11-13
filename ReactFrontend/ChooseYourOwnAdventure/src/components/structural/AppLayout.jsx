@@ -4,6 +4,7 @@ import { Container, Row, Col, Card } from "react-bootstrap";
 import Textbox from "../content/Textbox";
 import DisplayBox from "../content/DisplayBox";
 import InventoryBox from "../content/InventoryBox";
+import StoryMap from "../content/StoryMap";
 
 const theme = {
         background: 'linear-gradient(135deg, #1a0933 0%, #2d1b4e 100%)',
@@ -53,9 +54,10 @@ export default function AppLayout() {
 
     return <Container fluid>
         <Row>
-            <Col lg={3} style={{padding: '0px'}}>
+            <Col lg={3} style={{padding: '0px', maxHeight: '100vh', overflowY: 'auto'}}>
                 <DisplayBox theme={theme} sceneInfo={sceneInfo}/>
                 <InventoryBox theme={theme} inventory={inventory} />
+                <StoryMap currentScene={sceneInfo} />
             </Col>
             <Col lg={9} style={{padding: '0px'}}>
                 <Textbox theme={theme} onSceneChange={setSceneInfo} handleInventory={handleSetInventory} />

@@ -141,6 +141,42 @@ public class GameController {
     }
     
     /**
+     * Endpoint: GET /api/game/story-map
+     * Get the complete story structure for visualization
+     */
+    @GetMapping("/story-map")
+    public ResponseEntity<?> getStoryMap() {
+        List<Scene> allScenes = sceneRepository.findAll();
+        
+        // Build nodes
+        List<Map<String, Object>> nodes = allScenes.stream()
+            .map(scene -> {
+                Map<String, Object> node = new java.util.HashMap<>();
+                node.put("id", scene.getCode());
+                node.put("label", scene.getTitle());
+                node.put("isTerminal", scene.getIsTerminal());
+                return node;
+            })
+            .collect(Collectors.toList());
+        
+        // Build edges
+        List<Map<String, Object>> edges = new java.util.ArrayList<>();
+        for (Scene scene : allScenes) {
+            for (Choice choice : scene.getChoices()) {
+                Map<String, Object> edge = new java.util.HashMap<>();
+                edge.put("from", scene.getCode());
+                edge.put("to", choice.getTargetSceneCode());
+                edge.put("label", choice.getLabel());
+                edge.put("requiresFlag", choice.getRequiresFlag() != null ? choice.getRequiresFlag() : "");
+                edge.put("setsFlag", choice.getSetsFlag() != null ? choice.getSetsFlag() : "");
+                edges.add(edge);
+            }
+        }
+        
+        return ResponseEntity.ok(Map.of("nodes", nodes, "edges", edges));
+    }
+    
+    /**
      * Health check endpoint
      */
     @GetMapping("/health")
