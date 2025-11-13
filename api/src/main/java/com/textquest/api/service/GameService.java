@@ -54,6 +54,13 @@ public class GameService {
         
         // Create new game session
         GameSession gameSession = new GameSession(playerName, startingSceneCode);
+        
+        // Initialize health in flags
+        Map<String, Object> initialFlags = new HashMap<>();
+        initialFlags.put("health", 100);
+        initialFlags.put("maxHealth", 100);
+        gameSession.setFlagsJson(serializeFlags(initialFlags));
+        
         return gameSessionRepository.save(gameSession);
     }
     
@@ -121,8 +128,25 @@ public class GameService {
         // Process choice effects (update flags)
         Map<String, Object> updatedFlags = choiceService.processChoiceEffects(choiceId, playerFlags);
         
-        // Update game session
-        gameSession.setCurrentSceneCode(choice.getTargetSceneCode());
+        // Apply health changes if the choice sets a health modifier
+        if (choice.getSetsFlag() != null && choice.getSetsFlag().startsWith("health:")) {
+            applyHealthChange(updatedFlags, choice.getSetsFlag());
+        }
+        
+        // Check for death
+        int health = updatedFlags.containsKey("health") ? ((Number) updatedFlags.get("health")).intValue() : 100;
+        if (health <= 0) {
+            // Redirect to death scene if it exists, otherwise just set health to 0
+            if (sceneRepository.existsByCode("death")) {
+                gameSession.setCurrentSceneCode("death");
+            } else {
+                gameSession.setCurrentSceneCode(choice.getTargetSceneCode());
+            }
+        } else {
+            // Update game session with new scene
+            gameSession.setCurrentSceneCode(choice.getTargetSceneCode());
+        }
+        
         gameSession.setFlagsJson(serializeFlags(updatedFlags));
         
         return gameSessionRepository.save(gameSession);
@@ -177,6 +201,26 @@ public class GameService {
     private boolean isGameEnded(GameSession gameSession) {
         Optional<Scene> currentScene = sceneRepository.findByCode(gameSession.getCurrentSceneCode());
         return currentScene.map(Scene::getIsTerminal).orElse(false);
+    }
+    
+    /**
+     * Apply health modification from a flag value (e.g., "health:-10" or "health:+20")
+     */
+    private void applyHealthChange(Map<String, Object> flags, String healthModifier) {
+        if (healthModifier == null || !healthModifier.startsWith("health:")) {
+            return;
+        }
+        
+        try {
+            int change = Integer.parseInt(healthModifier.substring(7)); // Remove "health:"
+            int currentHealth = flags.containsKey("health") ? ((Number) flags.get("health")).intValue() : 100;
+            int maxHealth = flags.containsKey("maxHealth") ? ((Number) flags.get("maxHealth")).intValue() : 100;
+            
+            int newHealth = Math.max(0, Math.min(currentHealth + change, maxHealth));
+            flags.put("health", newHealth);
+        } catch (Exception e) {
+            // Invalid health modifier, ignore
+        }
     }
     
     /**

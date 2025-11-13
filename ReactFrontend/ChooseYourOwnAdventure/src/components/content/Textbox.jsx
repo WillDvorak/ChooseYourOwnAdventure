@@ -8,18 +8,47 @@ const Textbox = (props) => {
     const [input, setInput] = useState("");
     const [choices, setChoices] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [sessionId, setSessionId] = useState(null);
 
     const API_BASE = "/api/game";
 
     // Load the intro scene on component mount
     useEffect(() => {
-        loadScene("intro");
+        initializeGame();
     }, []);
 
-    const loadScene = async (sceneCode) => {
+    const initializeGame = async () => {
+        try {
+            // Create a new game session
+            const response = await fetch(`${API_BASE}/session/create?playerName=Adventurer&startingScene=intro`, {
+                method: 'POST'
+            });
+            
+            if (!response.ok) {
+                throw new Error('Failed to create session');
+            }
+            
+            const sessionData = await response.json();
+            setSessionId(sessionData.sessionId);
+            
+            // Load the starting scene with the new session
+            loadScene("intro", sessionData.sessionId);
+        } catch (error) {
+            console.error('Error initializing game:', error);
+            // Fallback to loading scene without session
+            loadScene("intro", null);
+        }
+    };
+
+    const loadScene = async (sceneCode, sessId = sessionId) => {
         setLoading(true);
         try {
-            const response = await fetch(`${API_BASE}/scene/${sceneCode}`);
+            // Include sessionId in the request to get health data
+            const url = sessId 
+                ? `${API_BASE}/scene/${sceneCode}?sessionId=${sessId}`
+                : `${API_BASE}/scene/${sceneCode}`;
+            
+            const response = await fetch(url);
 
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
@@ -30,7 +59,7 @@ const Textbox = (props) => {
             // Set the scene body as the message
             setMessages((prev) => [...prev, data.body]);
 
-            // Set sceneInfo for displaybox
+            // Set sceneInfo for displaybox (includes health data)
             props.onSceneChange(data)
 
 
@@ -59,16 +88,57 @@ const Textbox = (props) => {
     };
 
     const handleChoice = async (choice) => {
-        // alert(JSON.stringify(choice, null, 2));
-        
         setMessages((prev) => [...prev, `> ${choice.text}`]);
+        setLoading(true);
 
-
-        if (choice.setsFlag != "") {
-            props.handleInventory(choice.setsFlag, true)
+        try {
+            if (sessionId) {
+                // Use the backend to process the choice (updates health, flags, etc.)
+                const response = await fetch(`${API_BASE}/session/${sessionId}/choice/${choice.id}`, {
+                    method: 'POST'
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to process choice');
+                }
+                
+                const data = await response.json();
+                
+                // Update the UI with the new scene data (includes updated health)
+                setMessages((prev) => [...prev, data.body]);
+                props.onSceneChange(data);
+                
+                // Update choices
+                if (data.choices && data.choices.length > 0) {
+                    const formattedChoices = data.choices.map((choice) => ({
+                        id: choice.id,
+                        text: choice.label,
+                        targetScene: choice.targetSceneCode,
+                        requiresFlag: choice.requiresFlag,
+                        setsFlag: choice.setsFlag
+                    }));
+                    setChoices(formattedChoices);
+                } else {
+                    setChoices([]);
+                }
+                
+                // Handle inventory for display purposes
+                if (choice.setsFlag && choice.setsFlag !== "" && !choice.setsFlag.startsWith("health:")) {
+                    props.handleInventory(choice.setsFlag, true);
+                }
+            } else {
+                // Fallback to old behavior if no session
+                if (choice.setsFlag && choice.setsFlag !== "") {
+                    props.handleInventory(choice.setsFlag, true);
+                }
+                await loadScene(choice.targetScene);
+            }
+        } catch (error) {
+            console.error('Error processing choice:', error);
+            setMessages((prev) => [...prev, "⚠️ Error processing your choice"]);
+        } finally {
+            setLoading(false);
         }
-        // Load the target scene
-        await loadScene(choice.targetScene);
     }
 
     // const handleSubmit = async (e) => {
