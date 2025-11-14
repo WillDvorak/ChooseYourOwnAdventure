@@ -1,0 +1,203 @@
+/* Compact sidebar version */
+.story-map-container-compact {
+  padding: 1rem;
+  background: rgba(13, 5, 26, 0.9);
+  border: 2px solid #d4af37;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  max-height: 500px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.story-map-title-compact {
+  color: #d4af37;
+  text-align: center;
+  margin-bottom: 0.25rem;
+  font-family: Georgia, serif;
+  font-size: 1.1rem;
+}
+
+.story-map-subtitle-compact {
+  color: #999;
+  text-align: center;
+  margin-bottom: 0.75rem;
+  font-style: italic;
+  font-size: 0.8rem;
+}
+
+.story-map-svg-compact {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid #333;
+  border-radius: 5px;
+  display: block;
+  margin: 0 auto;
+}
+
+.loading-compact {
+  color: #d4af37;
+  text-align: center;
+  padding: 1.5rem;
+  font-size: 0.9rem;
+}
+
+/* Node styles */
+.node-group {
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.node-group:hover .node {
+  filter: brightness(1.3);
+}
+
+.node {
+  stroke: #d4af37;
+  stroke-width: 2;
+  transition: all 0.3s ease;
+}
+
+.node-regular {
+  fill: #2d4059;
+}
+
+.node-terminal {
+  fill: #c84b31;
+}
+
+.node-compact {
+  stroke-width: 2;
+}
+
+.node-current {
+  stroke-width: 3;
+  filter: brightness(1.5) drop-shadow(0 0 8px #ffd700);
+}
+
+.node-pulse {
+  fill: none;
+  stroke: #ffd700;
+  stroke-width: 2;
+  opacity: 0.5;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 0.3;
+    r: 55;
+  }
+  50% {
+    opacity: 0.7;
+    r: 60;
+  }
+}
+
+.node-label {
+  fill: #fff;
+  font-weight: bold;
+  font-size: 14px;
+  pointer-events: none;
+}
+
+.node-label-compact {
+  fill: #fff;
+  font-weight: bold;
+  font-size: 11px;
+  pointer-events: none;
+}
+
+.node-code {
+  fill: #d4af37;
+  font-size: 11px;
+  pointer-events: none;
+}
+
+/* Edge styles */
+.edge {
+  stroke: #d4af37;
+  stroke-width: 2;
+  fill: none;
+  opacity: 0.6;
+  transition: opacity 0.3s ease;
+}
+
+.edge:hover {
+  opacity: 1;
+  stroke-width: 3;
+}
+
+.edge-health {
+  stroke: #ff6b6b;
+  stroke-dasharray: 5, 5;
+}
+
+.edge-conditional {
+  stroke: #ffd93d;
+  stroke-dasharray: 10, 5;
+}
+
+.edge-label {
+  fill: #d4af37;
+  font-size: 10px;
+  pointer-events: none;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+/* Legend */
+.legend {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid #d4af37;
+  border-radius: 8px;
+}
+
+.legend h4 {
+  color: #d4af37;
+  margin-bottom: 0.75rem;
+  font-size: 1rem;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  color: #fff;
+}
+
+.legend-box {
+  width: 40px;
+  height: 25px;
+  border: 2px solid #d4af37;
+  border-radius: 3px;
+  margin-right: 0.75rem;
+}
+
+.legend-line {
+  width: 40px;
+  height: 2px;
+  margin-right: 0.75rem;
+  background: #d4af37;
+}
+
+.legend-item span {
+  font-size: 0.9rem;
+}
+
+/* Compact legend for sidebar */
+.legend-compact {
+  margin-top: 0.75rem;
+  padding: 0.5rem;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid #d4af37;
+  border-radius: 5px;
+  font-size: 0.8rem;
+}
+
+.legend-item-compact {
+  color: #d4af37;
+  margin-bottom: 0.25rem;
+  text-align: center;
+}
+
