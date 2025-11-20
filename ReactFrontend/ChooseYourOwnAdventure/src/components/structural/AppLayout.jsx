@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Container, Row, Col, Card } from "react-bootstrap";
+import { BrowserRouter, Route, Routes } from 'react-router';
 
 import Textbox from "../content/Textbox";
 import DisplayBox from "../content/DisplayBox";
@@ -32,7 +33,7 @@ export default function AppLayout() {
     const [sceneInfo, setSceneInfo] = useState(null)
     // Passes down inventory information to inventory box
     // Passes setInventory to Textbox 
-    const [inventory, setInventory] = useState([])
+    const [inventory, setInventory] = useState(["torch"])
 
     /**
      * Handles giving or taking an item from the user
