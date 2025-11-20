@@ -3,9 +3,13 @@ package com.textquest.api.service;
 import com.textquest.api.entity.GameSession;
 import com.textquest.api.entity.Scene;
 import com.textquest.api.entity.Choice;
+import com.textquest.api.entity.Item;
+import com.textquest.api.entity.PlayerInventory;
 import com.textquest.api.repository.GameSessionRepository;
 import com.textquest.api.repository.SceneRepository;
 import com.textquest.api.repository.ChoiceRepository;
+import com.textquest.api.repository.ItemRepository;
+import com.textquest.api.repository.PlayerInventoryRepository;
 import com.textquest.api.exception.GameSessionNotFoundException;
 import com.textquest.api.exception.SceneNotFoundException;
 import com.textquest.api.exception.InvalidChoiceException;
@@ -41,6 +45,12 @@ public class GameService {
     @Autowired
     private ChoiceService choiceService;
     
+    @Autowired
+    private ItemRepository itemRepository;
+    
+    @Autowired
+    private PlayerInventoryRepository playerInventoryRepository;
+    
     private final ObjectMapper objectMapper = new ObjectMapper();
     
     /**
@@ -52,15 +62,8 @@ public class GameService {
             throw new SceneNotFoundException("Starting scene not found: " + startingSceneCode);
         }
         
-        // Create new game session
+        // Create new game session (HP initialized to 100/100 in constructor)
         GameSession gameSession = new GameSession(playerName, startingSceneCode);
-        
-        // Initialize health in flags
-        Map<String, Object> initialFlags = new HashMap<>();
-        initialFlags.put("health", 100);
-        initialFlags.put("maxHealth", 100);
-        gameSession.setFlagsJson(serializeFlags(initialFlags));
-        
         return gameSessionRepository.save(gameSession);
     }
     
@@ -130,12 +133,17 @@ public class GameService {
         
         // Apply health changes if the choice sets a health modifier
         if (choice.getSetsFlag() != null && choice.getSetsFlag().startsWith("health:")) {
-            applyHealthChange(updatedFlags, choice.getSetsFlag());
+            try {
+                int change = Integer.parseInt(choice.getSetsFlag().substring(7)); // Remove "health:"
+                modifyHp(gameSession.getId(), change);
+                gameSession = getGameSession(gameSession.getId()); // Refresh to get updated HP
+            } catch (Exception e) {
+                // Invalid health modifier, ignore
+            }
         }
         
         // Check for death
-        int health = updatedFlags.containsKey("health") ? ((Number) updatedFlags.get("health")).intValue() : 100;
-        if (health <= 0) {
+        if (gameSession.getHp() <= 0) {
             // Redirect to death scene if it exists, otherwise just set health to 0
             if (sceneRepository.existsByCode("death")) {
                 gameSession.setCurrentSceneCode("death");
@@ -203,23 +211,247 @@ public class GameService {
         return currentScene.map(Scene::getIsTerminal).orElse(false);
     }
     
+    // ==================== HP METHODS ====================
+    
     /**
-     * Apply health modification from a flag value (e.g., "health:-10" or "health:+20")
+     * Modify HP (for damage or healing)
      */
-    private void applyHealthChange(Map<String, Object> flags, String healthModifier) {
-        if (healthModifier == null || !healthModifier.startsWith("health:")) {
-            return;
+    public GameSession modifyHp(Long sessionId, int hpChange) {
+        GameSession gameSession = getGameSession(sessionId);
+        if (isGameEnded(gameSession)) {
+            throw new GameEndedException("Game has already ended");
         }
-        
+        int newHp = gameSession.getHp() + hpChange;
+        newHp = Math.max(0, Math.min(newHp, gameSession.getMaxHp()));
+        gameSession.setHp(newHp);
+        return gameSessionRepository.save(gameSession);
+    }
+    
+    /**
+     * Set HP to a specific value
+     */
+    public GameSession setHp(Long sessionId, int hp) {
+        GameSession gameSession = getGameSession(sessionId);
+        if (isGameEnded(gameSession)) {
+            throw new GameEndedException("Game has already ended");
+        }
+        hp = Math.max(0, Math.min(hp, gameSession.getMaxHp()));
+        gameSession.setHp(hp);
+        return gameSessionRepository.save(gameSession);
+    }
+    
+    /**
+     * Set max HP and optionally adjust current HP
+     */
+    public GameSession setMaxHp(Long sessionId, int maxHp, boolean adjustCurrent) {
+        GameSession gameSession = getGameSession(sessionId);
+        if (isGameEnded(gameSession)) {
+            throw new GameEndedException("Game has already ended");
+        }
+        if (maxHp <= 0) {
+            throw new IllegalArgumentException("Max HP must be greater than 0");
+        }
+        int oldMaxHp = gameSession.getMaxHp();
+        gameSession.setMaxHp(maxHp);
+        if (adjustCurrent && oldMaxHp > 0) {
+            double ratio = (double) maxHp / oldMaxHp;
+            int newHp = (int) Math.round(gameSession.getHp() * ratio);
+            gameSession.setHp(Math.min(newHp, maxHp));
+        } else {
+            if (gameSession.getHp() > maxHp) {
+                gameSession.setHp(maxHp);
+            }
+        }
+        return gameSessionRepository.save(gameSession);
+    }
+    
+    /**
+     * Check if player is dead (HP <= 0)
+     */
+    @Transactional(readOnly = true)
+    public boolean isPlayerDead(Long sessionId) {
+        GameSession gameSession = getGameSession(sessionId);
+        return gameSession.getHp() <= 0;
+    }
+    
+    // ==================== INVENTORY METHODS ====================
+    
+    @Transactional(readOnly = true)
+    public List<PlayerInventory> getPlayerInventory(Long sessionId) {
+        getGameSession(sessionId);
+        return playerInventoryRepository.findBySessionId(sessionId);
+    }
+    
+    public PlayerInventory addItem(Long sessionId, Long itemId, Integer quantity) {
+        GameSession gameSession = getGameSession(sessionId);
+        if (isGameEnded(gameSession)) {
+            throw new GameEndedException("Game has already ended");
+        }
+        Item item = itemRepository.findById(itemId)
+                .orElseThrow(() -> new RuntimeException("Item not found: " + itemId));
+        Optional<PlayerInventory> existing = playerInventoryRepository.findByGameSessionAndItem(gameSession, item);
+        if (existing.isPresent()) {
+            PlayerInventory inventory = existing.get();
+            inventory.setQuantity(inventory.getQuantity() + (quantity != null ? quantity : 1));
+            return playerInventoryRepository.save(inventory);
+        } else {
+            PlayerInventory inventory = new PlayerInventory(gameSession, item, quantity != null ? quantity : 1);
+            return playerInventoryRepository.save(inventory);
+        }
+    }
+    
+    public PlayerInventory addItemByCode(Long sessionId, String itemCode, Integer quantity) {
+        Item item = itemRepository.findByCode(itemCode)
+                .orElseThrow(() -> new RuntimeException("Item not found: " + itemCode));
+        return addItem(sessionId, item.getId(), quantity);
+    }
+    
+    public void removeItem(Long sessionId, Long itemId, Integer quantity) {
+        GameSession gameSession = getGameSession(sessionId);
+        if (isGameEnded(gameSession)) {
+            throw new GameEndedException("Game has already ended");
+        }
+        Item item = itemRepository.findById(itemId)
+                .orElseThrow(() -> new RuntimeException("Item not found: " + itemId));
+        Optional<PlayerInventory> inventory = playerInventoryRepository.findByGameSessionAndItem(gameSession, item);
+        if (inventory.isPresent()) {
+            PlayerInventory inv = inventory.get();
+            int removeQuantity = quantity != null ? quantity : 1;
+            if (inv.getQuantity() <= removeQuantity) {
+                playerInventoryRepository.delete(inv);
+            } else {
+                inv.setQuantity(inv.getQuantity() - removeQuantity);
+                playerInventoryRepository.save(inv);
+            }
+        }
+    }
+    
+    public void removeItemByCode(Long sessionId, String itemCode, Integer quantity) {
+        Item item = itemRepository.findByCode(itemCode)
+                .orElseThrow(() -> new RuntimeException("Item not found: " + itemCode));
+        removeItem(sessionId, item.getId(), quantity);
+    }
+    
+    public PlayerInventory setItemQuantity(Long sessionId, Long itemId, Integer quantity) {
+        GameSession gameSession = getGameSession(sessionId);
+        if (isGameEnded(gameSession)) {
+            throw new GameEndedException("Game has already ended");
+        }
+        if (quantity == null || quantity <= 0) {
+            throw new IllegalArgumentException("Quantity must be greater than 0");
+        }
+        Item item = itemRepository.findById(itemId)
+                .orElseThrow(() -> new RuntimeException("Item not found: " + itemId));
+        Optional<PlayerInventory> existing = playerInventoryRepository.findByGameSessionAndItem(gameSession, item);
+        if (existing.isPresent()) {
+            PlayerInventory inventory = existing.get();
+            inventory.setQuantity(quantity);
+            return playerInventoryRepository.save(inventory);
+        } else {
+            PlayerInventory inventory = new PlayerInventory(gameSession, item, quantity);
+            return playerInventoryRepository.save(inventory);
+        }
+    }
+    
+    public Map<String, Object> useItem(Long sessionId, Long itemId) {
+        GameSession gameSession = getGameSession(sessionId);
+        if (isGameEnded(gameSession)) {
+            throw new GameEndedException("Game has already ended");
+        }
+        Item item = itemRepository.findById(itemId)
+                .orElseThrow(() -> new RuntimeException("Item not found: " + itemId));
+        Optional<PlayerInventory> inventory = playerInventoryRepository.findByGameSessionAndItem(gameSession, item);
+        if (!inventory.isPresent() || inventory.get().getQuantity() <= 0) {
+            throw new RuntimeException("Item not in inventory or quantity is 0");
+        }
+        Map<String, Object> effects = parseEffects(item.getEffectsJson());
+        Map<String, Object> result = new HashMap<>();
+        if (effects.containsKey("hp_change")) {
+            int hpChange = ((Number) effects.get("hp_change")).intValue();
+            modifyHp(sessionId, hpChange);
+            result.put("hp_change", hpChange);
+        }
+        if (effects.containsKey("max_hp_change")) {
+            int maxHpChange = ((Number) effects.get("max_hp_change")).intValue();
+            GameSession updated = getGameSession(sessionId);
+            int newMaxHp = updated.getMaxHp() + maxHpChange;
+            if (newMaxHp > 0) {
+                setMaxHp(sessionId, newMaxHp, false);
+                result.put("max_hp_change", maxHpChange);
+            }
+        }
+        if (item.getIsConsumable()) {
+            removeItem(sessionId, itemId, 1);
+            result.put("consumed", true);
+        } else {
+            result.put("consumed", false);
+        }
+        return result;
+    }
+    
+    public Map<String, Object> useItemByCode(Long sessionId, String itemCode) {
+        Item item = itemRepository.findByCode(itemCode)
+                .orElseThrow(() -> new RuntimeException("Item not found: " + itemCode));
+        return useItem(sessionId, item.getId());
+    }
+    
+    @Transactional(readOnly = true)
+    public boolean hasItem(Long sessionId, Long itemId) {
+        GameSession gameSession = getGameSession(sessionId);
+        Item item = itemRepository.findById(itemId)
+                .orElseThrow(() -> new RuntimeException("Item not found: " + itemId));
+        Optional<PlayerInventory> inventory = playerInventoryRepository.findByGameSessionAndItem(gameSession, item);
+        return inventory.isPresent() && inventory.get().getQuantity() > 0;
+    }
+    
+    @Transactional(readOnly = true)
+    public boolean hasItemByCode(Long sessionId, String itemCode) {
+        Item item = itemRepository.findByCode(itemCode)
+                .orElseThrow(() -> new RuntimeException("Item not found: " + itemCode));
+        return hasItem(sessionId, item.getId());
+    }
+    
+    @Transactional(readOnly = true)
+    public int getItemQuantity(Long sessionId, Long itemId) {
+        GameSession gameSession = getGameSession(sessionId);
+        Item item = itemRepository.findById(itemId)
+                .orElseThrow(() -> new RuntimeException("Item not found: " + itemId));
+        Optional<PlayerInventory> inventory = playerInventoryRepository.findByGameSessionAndItem(gameSession, item);
+        return inventory.map(PlayerInventory::getQuantity).orElse(0);
+    }
+    
+    @Transactional(readOnly = true)
+    public int getItemQuantityByCode(Long sessionId, String itemCode) {
+        Item item = itemRepository.findByCode(itemCode)
+                .orElseThrow(() -> new RuntimeException("Item not found: " + itemCode));
+        return getItemQuantity(sessionId, item.getId());
+    }
+    
+    @Transactional(readOnly = true)
+    public List<Item> getAllItems() {
+        return itemRepository.findAll();
+    }
+    
+    @Transactional(readOnly = true)
+    public Item getItemByCode(String itemCode) {
+        return itemRepository.findByCode(itemCode)
+                .orElseThrow(() -> new RuntimeException("Item not found: " + itemCode));
+    }
+    
+    @Transactional(readOnly = true)
+    public Item getItemById(Long itemId) {
+        return itemRepository.findById(itemId)
+                .orElseThrow(() -> new RuntimeException("Item not found: " + itemId));
+    }
+    
+    private Map<String, Object> parseEffects(String effectsJson) {
         try {
-            int change = Integer.parseInt(healthModifier.substring(7)); // Remove "health:"
-            int currentHealth = flags.containsKey("health") ? ((Number) flags.get("health")).intValue() : 100;
-            int maxHealth = flags.containsKey("maxHealth") ? ((Number) flags.get("maxHealth")).intValue() : 100;
-            
-            int newHealth = Math.max(0, Math.min(currentHealth + change, maxHealth));
-            flags.put("health", newHealth);
-        } catch (Exception e) {
-            // Invalid health modifier, ignore
+            if (effectsJson == null || effectsJson.trim().isEmpty()) {
+                return new HashMap<>();
+            }
+            return objectMapper.readValue(effectsJson, new TypeReference<Map<String, Object>>() {});
+        } catch (JsonProcessingException e) {
+            return new HashMap<>();
         }
     }
     

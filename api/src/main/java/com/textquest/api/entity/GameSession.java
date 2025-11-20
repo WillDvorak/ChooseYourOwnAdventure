@@ -20,6 +20,12 @@ public class GameSession {
     @Column(name = "flags_json", nullable = false, columnDefinition = "JSON")
     private String flagsJson;
     
+    @Column(name = "hp", nullable = false)
+    private Integer hp;
+    
+    @Column(name = "max_hp", nullable = false)
+    private Integer maxHp;
+    
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
     
@@ -29,18 +35,24 @@ public class GameSession {
     // Constructors
     public GameSession() {
         this.flagsJson = "{}"; // Default empty JSON object
+        this.hp = 100;
+        this.maxHp = 100;
     }
     
     public GameSession(String playerName, String currentSceneCode) {
         this.playerName = playerName;
         this.currentSceneCode = currentSceneCode;
         this.flagsJson = "{}"; // Default empty JSON object
+        this.hp = 100;
+        this.maxHp = 100;
     }
     
     public GameSession(String playerName, String currentSceneCode, String flagsJson) {
         this.playerName = playerName;
         this.currentSceneCode = currentSceneCode;
         this.flagsJson = flagsJson != null ? flagsJson : "{}";
+        this.hp = 100;
+        this.maxHp = 100;
     }
     
     // JPA lifecycle callbacks
@@ -88,6 +100,22 @@ public class GameSession {
         this.flagsJson = flagsJson != null ? flagsJson : "{}";
     }
     
+    public Integer getHp() {
+        return hp;
+    }
+    
+    public void setHp(Integer hp) {
+        this.hp = hp;
+    }
+    
+    public Integer getMaxHp() {
+        return maxHp;
+    }
+    
+    public void setMaxHp(Integer maxHp) {
+        this.maxHp = maxHp;
+    }
+    
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
@@ -111,6 +139,8 @@ public class GameSession {
                 ", playerName='" + playerName + '\'' +
                 ", currentSceneCode='" + currentSceneCode + '\'' +
                 ", flagsJson='" + flagsJson + '\'' +
+                ", hp=" + hp +
+                ", maxHp=" + maxHp +
                 '}';
     }
 }

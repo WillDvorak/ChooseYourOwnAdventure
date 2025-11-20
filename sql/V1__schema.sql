@@ -40,6 +40,24 @@ CREATE TABLE IF NOT EXISTS choices (
 ) ENGINE=InnoDB;
 
 -- =========================
+-- ITEMS (game items)
+-- =========================
+CREATE TABLE IF NOT EXISTS items (
+  id                  BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  code                VARCHAR(64)     NOT NULL,       -- unique item identifier
+  name                VARCHAR(128)    NOT NULL,       -- display name
+  description         TEXT            NULL,            -- item description
+  item_type           VARCHAR(64)     NOT NULL,       -- weapon, consumable, key, etc.
+  effects_json        JSON            NULL,           -- effects: {"hp_change": 10, "max_hp_change": 0}
+  is_consumable       TINYINT(1)      NOT NULL DEFAULT 0, -- can be consumed/used
+  created_at          TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at          TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  UNIQUE KEY uq_item_code (code),
+  KEY idx_item_type (item_type)
+) ENGINE=InnoDB;
+
+-- =========================
 -- GAME SESSIONS (player progress)
 -- =========================
 CREATE TABLE IF NOT EXISTS game_sessions (
@@ -47,9 +65,33 @@ CREATE TABLE IF NOT EXISTS game_sessions (
   player_name         VARCHAR(64)     NOT NULL,
   current_scene_code  VARCHAR(64)     NOT NULL,       -- scenes.code
   flags_json          JSON            NOT NULL,       -- stores inventory/flags
+  hp                  INT             NOT NULL DEFAULT 100,
+  max_hp              INT             NOT NULL DEFAULT 100,
   created_at          TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at          TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
   KEY idx_session_scene_code (current_scene_code),
   CHECK (JSON_VALID(flags_json))
+) ENGINE=InnoDB;
+
+-- =========================
+-- PLAYER INVENTORY (junction table)
+-- =========================
+CREATE TABLE IF NOT EXISTS player_inventory (
+  id                  BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  session_id          BIGINT UNSIGNED NOT NULL,       -- game_sessions.id
+  item_id             BIGINT UNSIGNED NOT NULL,       -- items.id
+  quantity            INT             NOT NULL DEFAULT 1,
+  created_at          TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at          TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  UNIQUE KEY uq_session_item (session_id, item_id),
+  KEY idx_inventory_session (session_id),
+  KEY idx_inventory_item (item_id),
+  CONSTRAINT fk_inventory_session
+    FOREIGN KEY (session_id) REFERENCES game_sessions(id)
+    ON DELETE CASCADE,
+  CONSTRAINT fk_inventory_item
+    FOREIGN KEY (item_id) REFERENCES items(id)
+    ON DELETE CASCADE
 ) ENGINE=InnoDB;
