@@ -1,17 +1,26 @@
-html {
+html, body, #root {
+    margin: 0;
     padding: 0;
-    overflow: hidden;
+    height: 100%;
 }
 
 body {
-    margin: 0;
-    background: #0a0615;  
+    /* Image + dark translucent overlay */
+    background:
+        linear-gradient(
+            135deg,
+            rgba(4, 2, 10, 0.85),
+            rgba(12, 5, 30, 0.92)
+        ),
+        url("/backgrounds/fantasy-forest.jpg");
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
 }
 
 #root {
-    background: linear-gradient(135deg, #0a0615 0%, #1a0933 100%);
     min-height: 100vh;
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: stretch;
 }
