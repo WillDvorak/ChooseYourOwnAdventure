@@ -1,6 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import './StoryMap.css';
 
+/**
+ * 
+ * @param {*} param0 
+ * @returns a story map component with a compact layout for sidebar use
+ */
 const StoryMap = ({ currentScene }) => {
   const [nodes, setNodes] = useState([]);
   const [edges, setEdges] = useState([]);

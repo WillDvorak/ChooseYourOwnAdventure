@@ -3,9 +3,16 @@ import { Container, Card, Form, Button } from "react-bootstrap"
 import useStorage from "../../hooks/useStorage";
 import 'bootstrap/dist/css/bootstrap.min.css';
 
+
+/**
+ * 
+ * @param {jsObject} props.theme -> JS object of theme attributes
+ * @param {callBackFunction} props.onSceneChange -> function to relay scene change to rest of components (calls setSceneChange in AppLayout)
+ * @param {callBackFunction} props.handleInventory -> function to handle inventory logic and pass info (calls setInventory in AppLayout)
+ * @returns 
+ */
 const Textbox = (props) => {
     const [messages, setMessages] = useState([]);
-    const [input, setInput] = useState("");
     const [choices, setChoices] = useState([]);
     const [loading, setLoading] = useState(true);
     const [sessionId, setSessionId] = useState(null);
@@ -125,14 +132,14 @@ const Textbox = (props) => {
                 // Handle inventory for display purposes
                 if (choice.setsFlag && choice.setsFlag !== "" && !choice.setsFlag.startsWith("health:")) {
                     props.handleInventory(choice.setsFlag, true);
-                }
+        }
             } else {
                 // Fallback to old behavior if no session
                 if (choice.setsFlag && choice.setsFlag !== "") {
                     props.handleInventory(choice.setsFlag, true);
                 }
-                await loadScene(choice.targetScene);
-            }
+        await loadScene(choice.targetScene);
+    }
         } catch (error) {
             console.error('Error processing choice:', error);
             setMessages((prev) => [...prev, "⚠️ Error processing your choice"]);
@@ -141,33 +148,8 @@ const Textbox = (props) => {
         }
     }
 
-    // const handleSubmit = async (e) => {
-    //     e.preventDefault();
-    //     if (!input.trim()) return;
-
-    //     const userInput = input.trim().toLowerCase();
-    //     setMessages((prev) => [...prev, `> ${input.trim()}`]);
-    //     setInput("");
-
-    //     // Check if user wants to load a different scene by code
-    //     if (["intro", "forest", "cave", "treasure"].includes(userInput)) {
-    //         await loadScene(userInput);
-    //     } else {
-    //         setMessages((prev) => [...prev, `Unknown command. Try scene names like "intro", "forest", "cave".`]);
-    //     }
-    // }
 
     return (
-        // <Container 
-        //     fluid 
-        //     className="d-flex flex-column justify-content-end" 
-        //     style={{
-        //         border: props.theme.containerBorder, 
-        //         height: "100vh",  
-        //         background: props.theme.background,
-        //         boxShadow: '0 0 50px rgba(212, 175, 55, 0.3)'
-        //     }}
-        // >
         <Card className="d-flex flex-column justify-content-end"
             style={{
                 background: props.theme.cardBg,
@@ -176,7 +158,7 @@ const Textbox = (props) => {
                 borderRadius: '12px',
                 padding: '1.5rem'
             }}>
-            <div style={{ maxHeight: '80vh', overflowY: 'auto', marginBottom: '1rem' }}>
+            <div style={{ maxHeight: '80vh', overflowY: 'auto', marginBottom: '1rem', scrollbarWidth: 'none' }}>
                 {messages.map((msg, i) => (
                     <p
                         style={{
@@ -240,37 +222,6 @@ const Textbox = (props) => {
                     ))}
                 </div>
             )}
-
-            {/* <Form onSubmit={handleSubmit}>
-                <Form.Group className="d-flex">
-                    <Form.Control
-                        type="text"
-                        placeholder="Type a command or scene name (intro, forest, cave)..."
-                        value={input}
-                        onChange={(e) => setInput(e.target.value)}
-                        disabled={loading}
-                        style={{
-                            background: props.theme.inputBg,
-                            color: props.theme.inputText,
-                            border: `2px solid ${props.theme.inputBorder}`,
-                            borderRadius: '8px 0 0 8px'
-                        }}
-                    />
-                    <Button
-                        type="submit"
-                        disabled={loading}
-                        style={{
-                            background: props.theme.buttonBg,
-                            color: props.theme.buttonText,
-                            border: 'none',
-                            fontWeight: 'bold',
-                            borderRadius: '0 8px 8px 0'
-                        }}
-                    >
-                        Send
-                    </Button>
-                </Form.Group>
-            </Form> */}
         </Card>
     );
 }

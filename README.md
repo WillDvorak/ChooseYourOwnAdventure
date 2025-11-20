@@ -15,6 +15,8 @@ Controlled Chaos
 
 This software will provide the user with an intereactive **text-based** choose your own adventure style game, it will prompt the user to make decisions and return reactions or consequences depending on the input of the user, allowing them to create their own unique experience. The user will be directed through various in game places, discussions, possible actions they can take, etc. There will be many different possible ending for the user to find!
 
+The user will make most of their choices through a 2 choice system, where their input places them within a unique scenario. The user will have an hp bar, inventory, as well as a map to help them on their adventure.
+
 <!-- This is an example paragraph written in markdown. You can use *italics*, **bold**, and other formatting options. You can also <u>use inline html</u> to format your text. The example sections included in this document are not necessarily all the sections you will want, and it is possible that you won't use all the one's provided. It is your responsibility to create a document that adequately conveys all the information about your project specifications and requirements. -->
 
 <!-- Please view this file's source to see `comments` with guidance on how you might use the different sections of this document.  -->
@@ -95,7 +97,7 @@ B <- -> C
 ```mermaid
 flowchart RL
 subgraph Front End
-	A(Static JS, CSS, HTML)
+	A(React, JS, CSS, HTML)
 end
 	
 subgraph Back End
@@ -103,7 +105,7 @@ subgraph Back End
 end
 	
 subgraph Database
-	C[(MySQL)]
+	C[(MySQL), Docker]
 end
 
 A <-->|HTTP| B
