@@ -193,24 +193,32 @@ const Textbox = (props) => {
                 padding: '1.5rem'
             }}>
             <div style={{ maxHeight: '80vh', overflowY: 'auto', marginBottom: '1rem' }}>
-                {messages.map((msg, i) => (
-                    <p
-                        style={{
-                            padding: "1rem",
-                            border: props.theme.messageBorder,
-                            background: props.theme.messageBg,
-                            color: props.theme.messageText,
-                            marginBottom: '0.5rem',
-                            borderRadius: '8px',
-                            fontFamily: 'Georgia, serif',
-                            fontSize: '1.1rem',
-                            lineHeight: '1.6'
-                        }}
-                        key={i}
-                    >
-                        {msg}
-                    </p>
-                ))}
+                {messages.map((msg, i) => {
+                    const isChoice = msg.startsWith("> ");
+                    return (
+                        <p
+                            key={i}
+                            style={{
+                                padding: "0.8rem 1rem",
+                                border: isChoice ? '1px solid rgba(212, 175, 55, 0.4)' : props.theme.messageBorder,
+                                background: isChoice
+                                    ? 'rgba(212, 175, 55, 0.15)'
+                                    : props.theme.messageBg,
+                                color: props.theme.messageText,
+                                marginBottom: '0.4rem',
+                                borderRadius: '8px',
+                                fontFamily: 'Georgia, serif',
+                                fontSize: '1.05rem',
+                                lineHeight: '1.6',
+                                opacity: isChoice ? 0.95 : 0.85,
+                                fontStyle: isChoice ? 'italic' : 'normal',
+                                borderLeft: isChoice ? '3px solid #d4af37' : 'none'
+                            }}
+                        >
+                            {msg}
+                        </p>
+                    );
+                })}
             </div>
 
             {loading && (
