@@ -170,7 +170,23 @@ const Textbox = (props) => {
         // >
         <Card className="d-flex flex-column justify-content-end"
             style={{
-                background: props.theme.cardBg,
+                background: `
+                    linear-gradient(135deg, rgba(13, 5, 26, 0.95), rgba(13, 5, 26, 0.85)),
+                    repeating-linear-gradient(
+                        0deg,
+                        transparent,
+                        transparent 40px,
+                        rgba(212, 175, 55, 0.03) 40px,
+                        rgba(212, 175, 55, 0.03) 41px
+                    ),
+                    repeating-linear-gradient(
+                        90deg,
+                        transparent,
+                        transparent 40px,
+                        rgba(212, 175, 55, 0.03) 40px,
+                        rgba(212, 175, 55, 0.03) 41px
+                    )
+                `,
                 border: props.theme.containerBorder,
                 height: "100vh",
                 borderRadius: '12px',
@@ -221,19 +237,33 @@ const Textbox = (props) => {
                             style={{
                                 display: "block",
                                 width: "100%",
-                                marginBottom: "0.5rem",
+                                marginBottom: "0.75rem",
                                 textAlign: "left",
-                                background: props.theme.buttonBg,
-                                color: props.theme.buttonText,
-                                border: 'none',
-                                padding: '1rem',
-                                fontWeight: 'bold',
-                                fontSize: '1.1rem',
-                                borderRadius: '8px',
-                                transition: 'all 0.3s ease'
+                                background: "linear-gradient(135deg, #d4af37, #f6e27a)",
+                                color: "#1a0933",
+                                border: "1px solid #f6e27a",
+                                padding: "1rem 1.4rem",
+                                fontWeight: "bold",
+                                fontSize: "1.05rem",
+                                borderRadius: "10px",
+                                boxShadow: "0 4px 10px rgba(0, 0, 0, 0.5)",
+                                transition: "transform 0.12s ease, box-shadow 0.12s ease, background 0.2s ease",
+                                cursor: "pointer"
                             }}
-                            onMouseEnter={(e) => e.target.style.background = props.theme.buttonHover}
-                            onMouseLeave={(e) => e.target.style.background = props.theme.buttonBg}
+                            onMouseEnter={(e) => {
+                                e.target.style.transform = "translateY(-2px)";
+                                e.target.style.boxShadow = "0 6px 16px rgba(0,0,0,0.7)";
+                            }}
+                            onMouseLeave={(e) => {
+                                e.target.style.transform = "translateY(0)";
+                                e.target.style.boxShadow = "0 4px 10px rgba(0,0,0,0.5)";
+                            }}
+                            onMouseDown={(e) => {
+                                e.target.style.transform = "translateY(1px) scale(0.99)";
+                            }}
+                            onMouseUp={(e) => {
+                                e.target.style.transform = "translateY(-2px)";
+                            }}
                         >
                             {index + 1}. {choice.text}
                         </Button>
