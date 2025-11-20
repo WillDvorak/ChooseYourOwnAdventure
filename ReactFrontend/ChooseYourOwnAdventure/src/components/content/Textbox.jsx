@@ -170,27 +170,13 @@ const Textbox = (props) => {
         // >
         <Card className="d-flex flex-column justify-content-end"
             style={{
-                background: `
-                    linear-gradient(135deg, rgba(13, 5, 26, 0.95), rgba(13, 5, 26, 0.85)),
-                    repeating-linear-gradient(
-                        0deg,
-                        transparent,
-                        transparent 40px,
-                        rgba(212, 175, 55, 0.03) 40px,
-                        rgba(212, 175, 55, 0.03) 41px
-                    ),
-                    repeating-linear-gradient(
-                        90deg,
-                        transparent,
-                        transparent 40px,
-                        rgba(212, 175, 55, 0.03) 40px,
-                        rgba(212, 175, 55, 0.03) 41px
-                    )
-                `,
-                border: props.theme.containerBorder,
+                background: "rgba(10, 6, 21, 0.88)",
+                backdropFilter: "blur(6px)",
+                border: "1px solid rgba(212, 175, 55, 0.5)",
                 height: "100vh",
-                borderRadius: '12px',
-                padding: '1.5rem'
+                borderRadius: "16px",
+                padding: "1.8rem",
+                boxShadow: "0 18px 40px rgba(0, 0, 0, 0.9), inset 0 1px 0 rgba(255, 255, 255, 0.1)"
             }}>
             <div style={{ maxHeight: '80vh', overflowY: 'auto', marginBottom: '1rem' }}>
                 {messages.map((msg, i) => {
