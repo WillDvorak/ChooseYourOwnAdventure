@@ -7,11 +7,10 @@ import { Modal, Image } from 'react-bootstrap';
  * @param {callBackFunction} onClose - function to close the modal  
  * @returns a pop up modal displaying item details on click of inventory item
  */
-export default function InventoryModal({ item, onClose }) {
+export default function InventoryModal(props) {
     if (!item) return null;
 
-    return <div>
-        {item ? 1 : 1}
+    return (
         <Modal show={!!item} onHide={onClose} centered>
             <Modal.Header closeButton>
                 <Modal.Title>{item.name}</Modal.Title>
@@ -31,5 +30,5 @@ export default function InventoryModal({ item, onClose }) {
                 </button>
             </Modal.Footer>
         </Modal>
-    </div>
+    );
 }
