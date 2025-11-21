@@ -13,7 +13,6 @@ import 'bootstrap/dist/css/bootstrap.min.css';
  */
 const Textbox = (props) => {
     const [messages, setMessages] = useState([]);
-    const [input, setInput] = useState("");
     const [choices, setChoices] = useState([]);
     const [loading, setLoading] = useState(true);
     const [sessionId, setSessionId] = useState(null);

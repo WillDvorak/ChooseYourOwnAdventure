@@ -53,3 +53,19 @@ CREATE TABLE IF NOT EXISTS game_sessions (
   KEY idx_session_scene_code (current_scene_code),
   CHECK (JSON_VALID(flags_json))
 ) ENGINE=InnoDB;
+
+-- =========================
+-- ITEMS (game inventory items)
+-- =========================
+CREATE TABLE IF NOT EXISTS items (
+  id                  BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  code                VARCHAR(64)     NOT NULL UNIQUE,
+  name                VARCHAR(128)    NOT NULL,
+  description         TEXT            NOT NULL,
+  long_description    TEXT           NOT NULL,
+  img_url            VARCHAR(255)    NULL,
+  large_img_url      VARCHAR(255)    NULL,
+  created_at          TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at          TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id)
+)

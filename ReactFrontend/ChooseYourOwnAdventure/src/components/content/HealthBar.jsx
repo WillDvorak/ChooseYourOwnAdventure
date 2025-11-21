@@ -1,6 +1,12 @@
 import React from 'react';
 import './HealthBar.css';
 
+
+/**
+ * 
+ * @param {*} param0 
+ * @returns 
+ */
 const HealthBar = ({ health = 100, maxHealth = 100 }) => {
   const percentage = Math.max(0, Math.min((health / maxHealth) * 100, 100));
   
