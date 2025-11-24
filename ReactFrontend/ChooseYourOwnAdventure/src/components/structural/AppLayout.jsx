@@ -1,9 +1,11 @@
-import React from "react";
+import { useState } from "react";
 import { Container, Row, Col, Card } from "react-bootstrap";
+import { BrowserRouter, Route, Routes } from 'react-router';
 
 import Textbox from "../content/Textbox";
 import DisplayBox from "../content/DisplayBox";
 import InventoryBox from "../content/InventoryBox";
+import StoryMap from "../content/StoryMap";
 
 const theme = {
         background: 'linear-gradient(135deg, #1a0933 0%, #2d1b4e 100%)',
@@ -25,14 +27,41 @@ const theme = {
 
 
 export default function AppLayout() {
+
+    // Passes down scene information to displaybox
+    // Passes setSceneMeta to textbox
+    const [sceneInfo, setSceneInfo] = useState(null)
+    // Passes down inventory information to inventory box
+    // Passes setInventory to Textbox 
+    const [inventory, setInventory] = useState(["torch"])
+
+    /**
+     * Handles giving or taking an item from the user
+     *
+     * @param {string} item - The item to add or take from inventory
+     * @param {boolean } isGiving - true if giving item to player, false if taking away
+     * @returns {void} - updates inventory state variable
+     */
+    function handleSetInventory(item, isGiving = true) {
+        isGiving ? setInventory([...inventory, item])
+        :
+        setInventory((prev) => {
+            const newInv = prev.filter(invItem => invItem != item)
+            setInventory(newInv)
+        })
+
+    }
+
+
     return <Container fluid>
         <Row>
-            <Col lg={3} style={{padding: '0px'}}>
-                <DisplayBox theme={theme}/>
-                <InventoryBox theme={theme} />
+            <Col lg={3} style={{padding: '0px', maxHeight: '100vh', overflowY: 'auto'}}>
+                <DisplayBox theme={theme} sceneInfo={sceneInfo}/>
+                <InventoryBox theme={theme} inventory={inventory} />
+                <StoryMap currentScene={sceneInfo} />
             </Col>
             <Col lg={9} style={{padding: '0px'}}>
-                <Textbox theme={theme}/>
+                <Textbox theme={theme} onSceneChange={setSceneInfo} handleInventory={handleSetInventory} />
             </Col>
         </Row>
     </Container>

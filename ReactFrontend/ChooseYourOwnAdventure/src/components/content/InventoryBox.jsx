@@ -1,11 +1,20 @@
 import { Card, Col, Row } from "react-bootstrap";
+import { useState } from "react";
 
-//Create a box that displays the current inventory items
+import InventoryModal from "./InventoryModal";
+
+/**
+ * 
+ * @param {jsObject} props.theme -> js object containing theme attributes
+ * @param {list<String>} props.inventory -> list of inventory item strings
+ * @returns 
+ */
 export default function InventoryBox(props) {
 
+    const [selectedItem, setSelectedItem] = useState(null);
 
-
-    const hardCodeInventory = ['torch', 'rock', 'stick', 'etc'];
+    
+    const inventory = props.inventory ?? []
     let placeholderImg = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ3vrTUU3CKbUDThpm8aZzFXdTmai6PodNfXA&s'
 
     return (
@@ -17,13 +26,15 @@ export default function InventoryBox(props) {
                 color: props.theme.messageText,
                 textAlign: "center",
                 fontFamily: props.theme.fontFamily,
+                minHeight: 300,
             }}
         >
             <h1>Inventory:</h1>
-            <Row xs={1} sm={2} className="g-3 p-3">
-                {hardCodeInventory.map((item, i) => (
+            {inventory.length > 0 ? 
+                <Row xs={1} sm={2} className="g-3 p-3">
+                {inventory.map((item, i) => (
                     <Col key={i}>
-                        <Card className="h-100">
+                        <Card className="h-100" onClick={() => {setSelectedItem(item)}}>
                             <Card.Body className="d-flex align-items-center gap-3">
                                 <img
                                     src={placeholderImg}
@@ -35,8 +46,14 @@ export default function InventoryBox(props) {
                             </Card.Body>
                         </Card>
                     </Col>
-                ))}
+                ))
+                }
             </Row>
+            :
+            <p>You have nothing in your inventory...</p>}
+            {selectedItem && (
+              <InventoryModal item={selectedItem} onClose={() => setSelectedItem(null)} />
+            )}
         </Card>
     );
 }

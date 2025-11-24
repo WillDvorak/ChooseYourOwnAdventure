@@ -1,0 +1,158 @@
+================================================================================
+           GAME FLOWCHART: INITIAL SCENE TO END SCENES (NO LOOPS)
+================================================================================
+
+                                  [intro]
+                             The Long One
+                            (Starting Scene)
+                                   |
+                +------------------+------------------+------------------+
+                |                  |                  |                  |
+        Head into forest   Walk toward glow   Explore ruins    Cross bridge
+                |                  |                  |                  |
+            [forest]             [cave]            [ruins]           [bridge]
+                |                  |                  |                  |
+    +-----------+-------+          |          +-------+-------+          |
+    |           |       |          |          |       |       |          |
+Follow      Search   Dangerous  Retreat   Examine  Read   Head to   Cross
+footprints supplies   path      to intro pedestal symbols temple   carefully
+    |       (loop)       |          |    (loop)  (loop)      |          |
+    |           |       |          |          |       |      |          |
+    |       Get torch [danger]     |      Get amulet  |   [temple]  [village]
+    |           |       |          |          |   Get |      |          |
+    |           |   +---+----+     |          |knowledge     |      Investigate
+    |           |   |   |    |     |          |       |      |    Search survivors
+    |           | Fight Run  |     |          |       |      |    (loop)   |
+    |           |(-30)(-10)  |     |          |       |      |      |      |
+    |           |   |   |    |     |          |       |      |  Get potion |
+    |           |   |   |  Befriend|          |       |      |      |      |
+    |           |   |   |  (-50 HP)|          |       |      |      |      |
+    |           |   |   |    |     |          |       |      |      |      |
+    |           |   |   |    |     |          |       |      |      |      |
+    |           |   |   |    |     |          |       |      |      |      |
+    |      [forest][forest] [cave] |          |       |      |      |      |
+    |       (after (after   (risky)|          |       |      |      |      |
+    |        combat)combat)  path) |          |       |      |      |      |
+    |           |       |     |    |          |       |      |      |      |
+    |           |       |     |    |          |       |      |      |      |
+    |           |       |     |    |          |       |      |      |      |
+    |      Look for healing spring |          |       |      |      |      |
+    |           |                  |          |       |      |      |      |
+    |        [heal]                |          |       |      |      |      |
+    |       (+25/+100 HP)          |          |       |      |      |      |
+    |           |                  |          |       |      |      |      |
+    |        [forest]              |          |       |      |      |      |
+    |           |                  |          |       |      |      |      |
+    |    Follow footprints         |          |       |      |      |      |
+    |           |                  |          |       |      |      |      |
+    |        [cave]                |          |       |      |      |      |
+    |           |                  |          |       |      |      |      |
+    |    Explore side passage      |          |       |      |      |      |
+    |           |                  |          |       |      |      |      |
+    |        [dungeon]             |          |       |      |      |      |
+    |           |                  |          |       |      |      |      |
+    |    Search for weapon (loop)  |          |       |      |      |      |
+    |    Sneak past                |          |       |      |      |      |
+    |           |                  |          |       |      |      |      |
+    |        [treasure]            |          |       |      |      |      |
+    |           |                  |          |       |      |      |      |
+    |    Take key/amulet           |          |       |      |      |      |
+    |           |                  |          |       |      |      |      |
+    |        [forest]              |          |       |      |      |      |
+    |           |                  |          |       |      |      |      |
+    |    Follow path to village    |          |       |      |      |      |
+    |           |                  |          |       |      |      |      |
+    |        [village]             |          |       |      |      |      |
+    |           |                  |          |       |      |      |      |
+    |    Continue to temple        |          |       |      |      |      |
+    |           |                  |          |       |      |      |      |
+    |                            [temple] ←----------+       |      |      |
+    |                             |                         |      |      |
+    |                             |                         |      |      |
+    |                    +--------+--------+                |      |      |
+    |                    |        |        |                |      |      |
+    |            Use amulet  Use key  Force door        Continue to
+    |              (loop)     (loop)  (sword, -25HP)    temple
+    |                    |        |        |                |
+    |                    |        |        |                |
+    |                    |    [temple]     |                |
+    |                    |  (door open)    |                |
+    |                    |        |        |                |
+    |                    |        |        |                |
+    |            +-------+--------+--------+--------+-------+
+    |            |       |        |        |        |       |
+    |      Enter with  Enter with  Study   Absorb   Head to
+    |       amulet      key     symbols  power   temple
+    |            |       |        |        |        |
+    |            |       |        |        |        |
+    |        [ending1][ending1] (loop) [ending2]    |
+    |        HERO'S RETURN        POWER WITHIN      |
+    |        (Terminal)           (Terminal)        |
+    |                                              |
+    |                                              |
+    |  ⚠️  HEALTH LOSS PATHS (Any scene with health loss)  ⚠️
+    |                                              |
+    |         If health <= 0 from any scene       |
+    |                    ↓                        |
+    |                [death]                      |
+    |              GAME OVER                      |
+    |             (Terminal)                      |
+
+================================================================================
+                    KEY PATHS TO ENDINGS
+================================================================================
+
+PATH 1: Ending1 - Hero's Return (via Amulet)
+  intro → ruins → Examine pedestal → ruins (get amulet) → temple → 
+  Use amulet → Enter temple → ending1 ✓
+
+PATH 2: Ending1 - Hero's Return (via Key from Cave)
+  intro → forest → Search supplies → forest (get torch) → cave → 
+  Descend deeper (needs torch, get key) → treasure → Take key/amulet → 
+  forest → Follow path to village → village → Continue to temple → 
+  temple → Use key → Enter temple → ending1 ✓
+
+PATH 3: Ending1 - Hero's Return (via Key from Dungeon)
+  intro → forest → Follow footprints → cave → Explore side passage → 
+  dungeon → Search for weapon (get sword) → Fight creature (get key) → 
+  treasure → Take key/amulet → forest → Follow path to village → 
+  village → Continue to temple → temple → Use key → Enter temple → ending1 ✓
+
+PATH 4: Ending1 - Hero's Return (via Force)
+  intro → (get sword from dungeon/treasure) → temple → 
+  Force door open (sword, -25 HP) → Enter temple → ending1 ✓
+
+PATH 5: Ending2 - Power Within
+  intro → ruins → Read symbols → ruins (get knowledge) → temple → 
+  Study symbols → Absorb power → ending2 ✓
+
+PATH 6: Death (Health Loss)
+  intro → (any path with health loss) → (health <= 0) → death ✗
+
+================================================================================
+                    IMPORTANT NOTES
+================================================================================
+
+• Loops are not shown in this flowchart (self-loops like "Search supplies" 
+  that return to the same scene)
+
+• Health loss can occur in:
+  - danger: -10, -30, -50 HP
+  - danger2: -5, -15, -20 HP
+  - bridge: -15 HP (risky crossing)
+  - temple: -25 HP (force door)
+
+• Health restoration available at:
+  - heal: +25 HP or +100 HP
+
+• Terminal scenes (game ends):
+  - ending1: Hero's Return
+  - ending2: Power Within  
+  - death: Game Over
+
+• Items needed for endings:
+  - ending1: amulet OR key OR sword
+  - ending2: knowledge
+
+================================================================================
+
