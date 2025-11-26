@@ -160,10 +160,6 @@ FROM scenes WHERE code = 'bridge';
 
 -- ---------- Village ----------
 INSERT INTO choices (scene_id, label, target_scene_code, requires_flag, sets_flag)
-SELECT id, 'Investigate the empty houses', 'village', NULL, NULL
-FROM scenes WHERE code = 'village';
-
-INSERT INTO choices (scene_id, label, target_scene_code, requires_flag, sets_flag)
 SELECT id, 'Search for survivors', 'village', NULL, 'potion'
 FROM scenes WHERE code = 'village';
 
@@ -194,27 +190,23 @@ FROM scenes WHERE code = 'dungeon';
 
 -- ---------- Temple ----------
 INSERT INTO choices (scene_id, label, target_scene_code, requires_flag, sets_flag)
-SELECT id, 'Use the amulet to open the door', 'temple', 'amulet', NULL
+SELECT id, 'Use the amulet to open the door', 'temple', 'amulet', 'door_open'
 FROM scenes WHERE code = 'temple';
 
 INSERT INTO choices (scene_id, label, target_scene_code, requires_flag, sets_flag)
-SELECT id, 'Use the key to unlock the door', 'temple', 'key', NULL
+SELECT id, 'Use the key to unlock the door', 'temple', 'key', 'door_open'
 FROM scenes WHERE code = 'temple';
 
 INSERT INTO choices (scene_id, label, target_scene_code, requires_flag, sets_flag)
-SELECT id, 'Force the door open (needs sword)', 'temple', 'sword', 'health:-25'
+SELECT id, 'Force the door open (needs sword, -25 HP)', 'temple', 'sword', 'door_open'
 FROM scenes WHERE code = 'temple';
 
 INSERT INTO choices (scene_id, label, target_scene_code, requires_flag, sets_flag)
-SELECT id, 'Study the symbols (needs knowledge)', 'temple', 'knowledge', NULL
+SELECT id, 'Study the symbols (needs knowledge)', 'temple', 'knowledge', 'door_open'
 FROM scenes WHERE code = 'temple';
 
 INSERT INTO choices (scene_id, label, target_scene_code, requires_flag, sets_flag)
-SELECT id, 'Enter the temple (if door is open)', 'ending1', 'amulet', NULL
-FROM scenes WHERE code = 'temple';
-
-INSERT INTO choices (scene_id, label, target_scene_code, requires_flag, sets_flag)
-SELECT id, 'Enter the temple (if door is open)', 'ending1', 'key', NULL
+SELECT id, 'Enter the temple (if door is open)', 'ending1', 'door_open', NULL
 FROM scenes WHERE code = 'temple';
 
 INSERT INTO choices (scene_id, label, target_scene_code, requires_flag, sets_flag)
