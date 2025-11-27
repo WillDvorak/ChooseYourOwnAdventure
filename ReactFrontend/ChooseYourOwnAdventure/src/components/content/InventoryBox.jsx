@@ -110,7 +110,7 @@ export default function InventoryBox(props) {
                 :
                 <p>You have nothing in your inventory...</p>}
             {selectedItem && (
-                <InventoryModal item={selectedItem} onClose={() => setSelectedItem(null)} theme={props.theme} itemImages={itemImageMap} />
+                <InventoryModal item={selectedItem} onClose={() => setSelectedItem(null)} itemImages={itemImageMap} />
             )}
         </Card>
     );
