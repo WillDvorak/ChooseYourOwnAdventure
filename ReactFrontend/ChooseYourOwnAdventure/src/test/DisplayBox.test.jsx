@@ -54,4 +54,14 @@ describe('DisplayBox', () => {
     expect(screen.getByText('Cave')).toBeInTheDocument();
     expect(screen.getByText('cave_2')).toBeInTheDocument();
   });
+
+  test('handles missing sceneInfo', () => {
+    render(<DisplayBox theme={theme} sceneInfo={null} />);
+    expect(screen.getAllByText('HARDCODE')[0]).toBeInTheDocument();
+  });
+
+  test('handles health values', () => {
+    render(<DisplayBox theme={theme} sceneInfo={{ title: 'Test', code: 'test', health: 50, maxHealth: 100 }} />);
+    expect(screen.getByText('50/100')).toBeInTheDocument();
+  });
 });

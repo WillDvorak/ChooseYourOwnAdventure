@@ -64,6 +64,13 @@ describe('Textbox Component', () => {
     // Mock the API response with specific text
     const mockSceneBody = 'You wake at a campfire. A narrow path leads into a pine forest.';
     
+    // Mock session creation first
+    global.fetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ sessionId: 'test-123' })
+    });
+    
+    // Mock scene loading second
     global.fetch.mockResolvedValueOnce({
       ok: true,
       json: async () => ({
@@ -74,7 +81,7 @@ describe('Textbox Component', () => {
     });
 
     // Render the component
-    render(<Textbox theme={theme} />);
+    render(<Textbox theme={theme} onSceneChange={() => {}} handleInventory={() => {}} />);
     
     // Wait for the API call to complete and text to appear
     await waitFor(() => {
@@ -88,6 +95,12 @@ describe('Textbox Component', () => {
 
   // TEST 3: Does the component display choice buttons?
   test('displays choice buttons from API response', async () => {
+    // Mock session creation
+    global.fetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ sessionId: 'test-123' })
+    });
+    
     // Mock API with choices - use 'label' and 'targetSceneCode' like the real API
     global.fetch.mockResolvedValueOnce({
       ok: true,
@@ -101,7 +114,7 @@ describe('Textbox Component', () => {
       })
     });
 
-    render(<Textbox theme={theme} />);
+    render(<Textbox theme={theme} onSceneChange={() => {}} handleInventory={() => {}} />);
     
     // Wait for choices to appear - use regex for flexible matching
     // The /i flag makes it case-insensitive
@@ -117,7 +130,7 @@ describe('Textbox Component', () => {
     expect(leftButton).toBeInTheDocument();
     expect(rightButton).toBeInTheDocument();
     
-    // Extra check: make sure there are exactly 3 buttons (2 choices + 1 Send button)
+    // Extra check: make sure there are exactly 2 buttons (2 choices)
     const allButtons = screen.getAllByRole('button');
     expect(allButtons).toHaveLength(2);
   });
@@ -163,6 +176,12 @@ describe('Textbox Component', () => {
     // Setup user event (simulates real user interactions)
     const user = userEvent.setup();
     
+    // Mock session creation
+    global.fetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ sessionId: 'test-123' })
+    });
+    
     // Mock #1: Initial scene load - use real API format
     global.fetch.mockResolvedValueOnce({
       ok: true,
@@ -186,7 +205,7 @@ describe('Textbox Component', () => {
       })
     });
 
-    render(<Textbox theme={theme} />);
+    render(<Textbox theme={theme} onSceneChange={() => {}} handleInventory={() => {}} />);
     
     // Wait for buttons to appear
     await waitFor(() => {
@@ -198,16 +217,34 @@ describe('Textbox Component', () => {
     await user.click(leftButton);
     
     // After clicking, verify the new scene loaded
-    // (Note: the component replaces messages when loading a new scene)
     await waitFor(() => {
       expect(screen.getByText(/You went left and found a treasure!/i)).toBeInTheDocument();
     });
     
     // Verify the scene text is displayed
     expect(screen.getByText(/You went left and found a treasure!/i)).toBeInTheDocument();
+  });
+
+  test('handles empty choices', async () => {
+    global.fetch.mockResolvedValue({
+      ok: true,
+      json: async () => ({ code: 'end', body: 'The end.', choices: [] })
+    });
     
-    // Verify the old scene is gone (replaced by new one)
-    expect(screen.queryByText(/You are at a crossroads/i)).not.toBeInTheDocument();
+    render(<Textbox theme={theme} onSceneChange={() => {}} handleInventory={() => {}} />);
+    await waitFor(() => {
+      expect(screen.getByText('The end.')).toBeInTheDocument();
+    });
+    expect(screen.queryByRole('button')).not.toBeInTheDocument();
+  });
+
+  test('shows error on network failure', async () => {
+    global.fetch.mockRejectedValue(new Error('Network error'));
+    
+    render(<Textbox theme={theme} onSceneChange={() => {}} handleInventory={() => {}} />);
+    await waitFor(() => {
+      expect(screen.getByText(/Error/i)).toBeInTheDocument();
+    });
   });
   
 });

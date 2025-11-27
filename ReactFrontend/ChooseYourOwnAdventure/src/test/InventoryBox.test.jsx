@@ -64,4 +64,22 @@ describe('InventoryBox Component', () => {
     expect(screen.getByText('rock')).toBeInTheDocument();
   });
 
+  test('handles null inventory', () => {
+    render(<InventoryBox theme={theme} inventory={null} />);
+    expect(screen.getByText(/nothing in your inventory/i)).toBeInTheDocument();
+  });
+
+  test('handles undefined inventory', () => {
+    render(<InventoryBox theme={theme} />);
+    expect(screen.getByText(/nothing in your inventory/i)).toBeInTheDocument();
+  });
+
+  test('handles many items', () => {
+    const items = ['torch', 'sword', 'potion', 'key', 'map'];
+    render(<InventoryBox theme={theme} inventory={items} />);
+    items.forEach(item => {
+      expect(screen.getByText(item)).toBeInTheDocument();
+    });
+  });
+
 })
