@@ -20,6 +20,15 @@ public class GameSession {
     @Column(name = "flags_json", nullable = false, columnDefinition = "JSON")
     private String flagsJson;
     
+    @Column(name = "save_slot")
+    private Integer saveSlot;
+    
+    @Column(name = "save_name", length = 128)
+    private String saveName;
+    
+    @Column(name = "is_auto_save", nullable = false)
+    private Boolean isAutoSave;
+    
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
     
@@ -29,18 +38,21 @@ public class GameSession {
     // Constructors
     public GameSession() {
         this.flagsJson = "{}"; // Default empty JSON object
+        this.isAutoSave = false;
     }
     
     public GameSession(String playerName, String currentSceneCode) {
         this.playerName = playerName;
         this.currentSceneCode = currentSceneCode;
         this.flagsJson = "{}"; // Default empty JSON object
+        this.isAutoSave = false;
     }
     
     public GameSession(String playerName, String currentSceneCode, String flagsJson) {
         this.playerName = playerName;
         this.currentSceneCode = currentSceneCode;
         this.flagsJson = flagsJson != null ? flagsJson : "{}";
+        this.isAutoSave = false;
     }
     
     // JPA lifecycle callbacks
@@ -88,6 +100,30 @@ public class GameSession {
         this.flagsJson = flagsJson != null ? flagsJson : "{}";
     }
     
+    public Integer getSaveSlot() {
+        return saveSlot;
+    }
+    
+    public void setSaveSlot(Integer saveSlot) {
+        this.saveSlot = saveSlot;
+    }
+    
+    public String getSaveName() {
+        return saveName;
+    }
+    
+    public void setSaveName(String saveName) {
+        this.saveName = saveName;
+    }
+    
+    public Boolean getIsAutoSave() {
+        return isAutoSave;
+    }
+    
+    public void setIsAutoSave(Boolean isAutoSave) {
+        this.isAutoSave = isAutoSave != null ? isAutoSave : false;
+    }
+    
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
@@ -111,6 +147,9 @@ public class GameSession {
                 ", playerName='" + playerName + '\'' +
                 ", currentSceneCode='" + currentSceneCode + '\'' +
                 ", flagsJson='" + flagsJson + '\'' +
+                ", saveSlot=" + saveSlot +
+                ", saveName='" + saveName + '\'' +
+                ", isAutoSave=" + isAutoSave +
                 '}';
     }
 }

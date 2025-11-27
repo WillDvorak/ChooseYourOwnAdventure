@@ -186,6 +186,121 @@ public class GameService {
         gameSessionRepository.delete(gameSession);
     }
     
+    // ==================== SAVE SLOT METHODS ====================
+    
+    /**
+     * Save current game session to a specific save slot (1-10)
+     */
+    public GameSession saveToSlot(Long sessionId, Integer saveSlot, String saveName, boolean isAutoSave) {
+        if (saveSlot == null || saveSlot < 1 || saveSlot > 10) {
+            throw new IllegalArgumentException("Save slot must be between 1 and 10");
+        }
+        
+        GameSession gameSession = getGameSession(sessionId);
+        
+        // Check if slot is already taken by another session for this player
+        Optional<GameSession> existingSave = gameSessionRepository.findByPlayerNameAndSaveSlot(
+            gameSession.getPlayerName(), saveSlot);
+        
+        if (existingSave.isPresent() && !existingSave.get().getId().equals(sessionId)) {
+            // Slot is taken by a different session - delete it first
+            gameSessionRepository.delete(existingSave.get());
+        }
+        
+        // Save current session to the slot
+        gameSession.setSaveSlot(saveSlot);
+        gameSession.setSaveName(saveName);
+        gameSession.setIsAutoSave(isAutoSave);
+        
+        return gameSessionRepository.save(gameSession);
+    }
+    
+    /**
+     * Load a game session from a specific save slot
+     */
+    @Transactional(readOnly = true)
+    public GameSession loadFromSlot(String playerName, Integer saveSlot) {
+        if (saveSlot == null || saveSlot < 1 || saveSlot > 10) {
+            throw new IllegalArgumentException("Save slot must be between 1 and 10");
+        }
+        
+        return gameSessionRepository.findByPlayerNameAndSaveSlot(playerName, saveSlot)
+                .orElseThrow(() -> new GameSessionNotFoundException(
+                    "No save found in slot " + saveSlot + " for player " + playerName));
+    }
+    
+    /**
+     * Get all save slots for a player
+     */
+    @Transactional(readOnly = true)
+    public List<GameSession> listSaveSlots(String playerName) {
+        return gameSessionRepository.findSaveSlotsByPlayerName(playerName);
+    }
+    
+    /**
+     * Get information about a specific save slot
+     */
+    @Transactional(readOnly = true)
+    public GameSession getSaveSlotInfo(String playerName, Integer saveSlot) {
+        if (saveSlot == null || saveSlot < 1 || saveSlot > 10) {
+            throw new IllegalArgumentException("Save slot must be between 1 and 10");
+        }
+        
+        return gameSessionRepository.findByPlayerNameAndSaveSlot(playerName, saveSlot)
+                .orElseThrow(() -> new GameSessionNotFoundException(
+                    "No save found in slot " + saveSlot + " for player " + playerName));
+    }
+    
+    /**
+     * Delete a save slot
+     */
+    public void deleteSaveSlot(String playerName, Integer saveSlot) {
+        if (saveSlot == null || saveSlot < 1 || saveSlot > 10) {
+            throw new IllegalArgumentException("Save slot must be between 1 and 10");
+        }
+        
+        GameSession saveSlotSession = gameSessionRepository.findByPlayerNameAndSaveSlot(playerName, saveSlot)
+                .orElseThrow(() -> new GameSessionNotFoundException(
+                    "No save found in slot " + saveSlot + " for player " + playerName));
+        
+        gameSessionRepository.delete(saveSlotSession);
+    }
+    
+    /**
+     * Get the active (unsaved) session for a player
+     */
+    @Transactional(readOnly = true)
+    public Optional<GameSession> getActiveSession(String playerName) {
+        return gameSessionRepository.findActiveSessionByPlayerName(playerName);
+    }
+    
+    /**
+     * Create a new session from a save slot (creates a copy, doesn't delete the save)
+     */
+    public GameSession createSessionFromSave(String playerName, Integer saveSlot) {
+        GameSession savedSession = loadFromSlot(playerName, saveSlot);
+        
+        // Create a new active session (saveSlot = null) with the same data
+        GameSession newSession = new GameSession(
+            savedSession.getPlayerName(),
+            savedSession.getCurrentSceneCode(),
+            savedSession.getFlagsJson()
+        );
+        newSession.setSaveSlot(null); // Active session, not a save
+        newSession.setSaveName(null);
+        newSession.setIsAutoSave(false);
+        
+        return gameSessionRepository.save(newSession);
+    }
+    
+    /**
+     * Get count of save slots for a player
+     */
+    @Transactional(readOnly = true)
+    public long getSaveSlotCount(String playerName) {
+        return gameSessionRepository.countSaveSlotsByPlayerName(playerName);
+    }
+    
     /**
      * Check if the game has ended (reached a terminal scene)
      */

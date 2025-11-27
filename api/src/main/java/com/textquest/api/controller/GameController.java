@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
@@ -182,6 +183,153 @@ public class GameController {
     @GetMapping("/health")
     public ResponseEntity<String> health() {
         return ResponseEntity.ok("Game API is running!");
+    }
+    
+    // ==================== SAVE SLOT ENDPOINTS ====================
+    
+    /**
+     * Endpoint: POST /api/game/session/{sessionId}/save/{slot}
+     * Save current game session to a specific save slot (1-10)
+     */
+    @PostMapping("/session/{sessionId}/save/{slot}")
+    public ResponseEntity<?> saveToSlot(@PathVariable Long sessionId, 
+                                        @PathVariable Integer slot,
+                                        @RequestParam(required = false) String saveName,
+                                        @RequestParam(defaultValue = "false") boolean isAutoSave) {
+        try {
+            GameSession saved = gameService.saveToSlot(sessionId, slot, saveName, isAutoSave);
+            return ResponseEntity.ok(Map.of(
+                "sessionId", saved.getId(),
+                "saveSlot", saved.getSaveSlot(),
+                "saveName", saved.getSaveName() != null ? saved.getSaveName() : "",
+                "isAutoSave", saved.getIsAutoSave(),
+                "currentScene", saved.getCurrentSceneCode(),
+                "updatedAt", saved.getUpdatedAt().toString()
+            ));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+    
+    /**
+     * Endpoint: GET /api/game/player/{playerName}/saves
+     * Get all save slots for a player
+     */
+    @GetMapping("/player/{playerName}/saves")
+    public ResponseEntity<?> listSaveSlots(@PathVariable String playerName) {
+        List<GameSession> saves = gameService.listSaveSlots(playerName);
+        List<Map<String, Object>> formattedSaves = saves.stream()
+            .map(save -> {
+                Map<String, Object> saveMap = new java.util.HashMap<>();
+                saveMap.put("sessionId", save.getId());
+                saveMap.put("saveSlot", save.getSaveSlot());
+                saveMap.put("saveName", save.getSaveName() != null ? save.getSaveName() : "");
+                saveMap.put("isAutoSave", save.getIsAutoSave());
+                saveMap.put("currentScene", save.getCurrentSceneCode());
+                saveMap.put("createdAt", save.getCreatedAt().toString());
+                saveMap.put("updatedAt", save.getUpdatedAt().toString());
+                return saveMap;
+            })
+            .collect(Collectors.toList());
+        return ResponseEntity.ok(Map.of("saves", formattedSaves, "count", formattedSaves.size()));
+    }
+    
+    /**
+     * Endpoint: GET /api/game/player/{playerName}/save/{slot}
+     * Get information about a specific save slot
+     */
+    @GetMapping("/player/{playerName}/save/{slot}")
+    public ResponseEntity<?> getSaveSlotInfo(@PathVariable String playerName, @PathVariable Integer slot) {
+        try {
+            GameSession save = gameService.getSaveSlotInfo(playerName, slot);
+            return ResponseEntity.ok(Map.of(
+                "sessionId", save.getId(),
+                "saveSlot", save.getSaveSlot(),
+                "saveName", save.getSaveName() != null ? save.getSaveName() : "",
+                "isAutoSave", save.getIsAutoSave(),
+                "playerName", save.getPlayerName(),
+                "currentScene", save.getCurrentSceneCode(),
+                "flags", gameService.getPlayerFlags(save.getId()),
+                "createdAt", save.getCreatedAt().toString(),
+                "updatedAt", save.getUpdatedAt().toString()
+            ));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+    
+    /**
+     * Endpoint: POST /api/game/player/{playerName}/save/{slot}/load
+     * Load a save slot and create a new active session from it
+     */
+    @PostMapping("/player/{playerName}/save/{slot}/load")
+    public ResponseEntity<?> loadFromSave(@PathVariable String playerName, @PathVariable Integer slot) {
+        try {
+            GameSession newSession = gameService.createSessionFromSave(playerName, slot);
+            return ResponseEntity.ok(Map.of(
+                "sessionId", newSession.getId(),
+                "playerName", newSession.getPlayerName(),
+                "currentScene", newSession.getCurrentSceneCode(),
+                "flags", gameService.getPlayerFlags(newSession.getId()),
+                "message", "Save loaded successfully"
+            ));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+    
+    /**
+     * Endpoint: DELETE /api/game/player/{playerName}/save/{slot}
+     * Delete a specific save slot
+     */
+    @DeleteMapping("/player/{playerName}/save/{slot}")
+    public ResponseEntity<?> deleteSaveSlot(@PathVariable String playerName, @PathVariable Integer slot) {
+        try {
+            gameService.deleteSaveSlot(playerName, slot);
+            return ResponseEntity.ok(Map.of("message", "Save slot " + slot + " deleted successfully"));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+    
+    /**
+     * Endpoint: GET /api/game/player/{playerName}/active
+     * Get the active (unsaved) session for a player
+     */
+    @GetMapping("/player/{playerName}/active")
+    public ResponseEntity<?> getActiveSession(@PathVariable String playerName) {
+        Optional<GameSession> activeSession = gameService.getActiveSession(playerName);
+        if (activeSession.isPresent()) {
+            GameSession session = activeSession.get();
+            return ResponseEntity.ok(Map.of(
+                "sessionId", session.getId(),
+                "playerName", session.getPlayerName(),
+                "currentScene", session.getCurrentSceneCode(),
+                "flags", gameService.getPlayerFlags(session.getId()),
+                "createdAt", session.getCreatedAt().toString(),
+                "updatedAt", session.getUpdatedAt().toString()
+            ));
+        } else {
+            return ResponseEntity.ok(Map.of("sessionId", null, "message", "No active session found"));
+        }
+    }
+    
+    /**
+     * Endpoint: GET /api/game/player/{playerName}/saves/count
+     * Get count of save slots for a player
+     */
+    @GetMapping("/player/{playerName}/saves/count")
+    public ResponseEntity<?> getSaveSlotCount(@PathVariable String playerName) {
+        long count = gameService.getSaveSlotCount(playerName);
+        return ResponseEntity.ok(Map.of("count", count, "maxSlots", 10));
     }
 }
 

@@ -47,11 +47,17 @@ CREATE TABLE IF NOT EXISTS game_sessions (
   player_name         VARCHAR(64)     NOT NULL,
   current_scene_code  VARCHAR(64)     NOT NULL,       -- scenes.code
   flags_json          JSON            NOT NULL,       -- stores inventory/flags
+  save_slot           INT             NULL,           -- save slot number (1-10, NULL for active/unsaved sessions)
+  save_name           VARCHAR(128)    NULL,           -- optional user-friendly save name
+  is_auto_save        TINYINT(1)      NOT NULL DEFAULT 0, -- true for auto-saves, false for manual saves
   created_at          TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at          TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
   KEY idx_session_scene_code (current_scene_code),
-  CHECK (JSON_VALID(flags_json))
+  KEY idx_player_slot (player_name, save_slot),
+  UNIQUE KEY uq_player_slot (player_name, save_slot),
+  CHECK (JSON_VALID(flags_json)),
+  CHECK (save_slot IS NULL OR (save_slot >= 1 AND save_slot <= 10))
 ) ENGINE=InnoDB;
 
 -- =========================

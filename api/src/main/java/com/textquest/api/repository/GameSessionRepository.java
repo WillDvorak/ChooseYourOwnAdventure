@@ -67,4 +67,34 @@ public interface GameSessionRepository extends JpaRepository<GameSession, Long> 
      */
     @Query("SELECT gs FROM GameSession gs ORDER BY gs.updatedAt DESC")
     List<GameSession> findAllOrderByUpdatedAtDesc();
+    
+    /**
+     * Find game session by player name and save slot
+     */
+    @Query("SELECT gs FROM GameSession gs WHERE gs.playerName = :playerName AND gs.saveSlot = :saveSlot")
+    Optional<GameSession> findByPlayerNameAndSaveSlot(@Param("playerName") String playerName, @Param("saveSlot") Integer saveSlot);
+    
+    /**
+     * Find all save slots for a player (sessions with saveSlot not null)
+     */
+    @Query("SELECT gs FROM GameSession gs WHERE gs.playerName = :playerName AND gs.saveSlot IS NOT NULL ORDER BY gs.saveSlot ASC")
+    List<GameSession> findSaveSlotsByPlayerName(@Param("playerName") String playerName);
+    
+    /**
+     * Find active session for a player (session with saveSlot null, most recent)
+     */
+    @Query("SELECT gs FROM GameSession gs WHERE gs.playerName = :playerName AND gs.saveSlot IS NULL ORDER BY gs.updatedAt DESC")
+    Optional<GameSession> findActiveSessionByPlayerName(@Param("playerName") String playerName);
+    
+    /**
+     * Check if a save slot exists for a player
+     */
+    @Query("SELECT COUNT(gs) > 0 FROM GameSession gs WHERE gs.playerName = :playerName AND gs.saveSlot = :saveSlot")
+    boolean existsByPlayerNameAndSaveSlot(@Param("playerName") String playerName, @Param("saveSlot") Integer saveSlot);
+    
+    /**
+     * Count save slots for a player
+     */
+    @Query("SELECT COUNT(gs) FROM GameSession gs WHERE gs.playerName = :playerName AND gs.saveSlot IS NOT NULL")
+    long countSaveSlotsByPlayerName(@Param("playerName") String playerName);
 }

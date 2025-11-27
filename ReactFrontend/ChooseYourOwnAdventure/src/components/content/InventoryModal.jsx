@@ -8,6 +8,7 @@ import { Modal, Image } from 'react-bootstrap';
  * @returns a pop up modal displaying item details on click of inventory item
  */
 export default function InventoryModal(props) {
+    const { item, onClose } = props;
     if (!item) return null;
 
     return (
