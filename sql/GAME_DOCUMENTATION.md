@@ -183,7 +183,6 @@ The game consists of **15 scenes**:
 
 | Choice | Target Scene | Requires Flag | Sets Flag | Notes |
 |--------|--------------|---------------|-----------|-------|
-| Investigate the empty houses | `village` | None | None | Self-loop, exploration |
 | Search for survivors | `village` | None | `potion` | Self-loop, grants potion |
 | Continue to the temple | `temple` | None | None | Direct path to temple |
 | Return to the forest | `forest` | None | None | Return to forest |
@@ -201,12 +200,11 @@ The game consists of **15 scenes**:
 
 | Choice | Target Scene | Requires Flag | Sets Flag | Notes |
 |--------|--------------|---------------|-----------|-------|
-| Use the amulet to open the door | `temple` | `amulet` | None | Opens door (self-loop) |
-| Use the key to unlock the door | `temple` | `key` | None | Opens door (self-loop) |
-| Force the door open (needs sword) | `temple` | `sword` | `health:-25` | Opens door but costs health |
-| Study the symbols (needs knowledge) | `temple` | `knowledge` | None | Opens door (self-loop) |
-| Enter the temple (if door is open) | `ending1` | `amulet` | None | **Good ending** |
-| Enter the temple (if door is open) | `ending1` | `key` | None | **Good ending** |
+| Use the amulet to open the door | `temple` | `amulet` | `door_open` | Opens door, sets door_open flag |
+| Use the key to unlock the door | `temple` | `key` | `door_open` | Opens door, sets door_open flag |
+| Force the door open (needs sword, -25 HP) | `temple` | `sword` | `door_open` | Opens door but costs 25 HP |
+| Study the symbols (needs knowledge) | `temple` | `knowledge` | `door_open` | Opens door, sets door_open flag |
+| Enter the temple (if door is open) | `ending1` | `door_open` | None | **Good ending** - requires door_open |
 | Absorb the temple's power | `ending2` | `knowledge` | None | **Alternative ending** |
 
 ### From `treasure` (Hidden Cache)
@@ -282,11 +280,13 @@ For better visualization, see the following diagram files in this directory:
 ### Key Paths:
 
 1. **Path to Victory (Ending1 - Hero's Return)**:
-   - `intro` → `ruins` → Examine pedestal → `ruins` (get amulet) → `temple` → Use amulet → Enter temple → `ending1` ✅
-   - OR: `intro` → `forest` → Search supplies → `forest` (get torch) → `cave` → Descend with torch → `treasure` (get key) → `temple` → Use key → Enter temple → `ending1` ✅
+   - `intro` → `ruins` → Examine pedestal → `ruins` (get amulet) → `temple` → Use amulet (sets door_open) → Enter temple (requires door_open) → `ending1` ✅
+   - OR: `intro` → `forest` → Search supplies → `forest` (get torch) → `cave` → Descend with torch → `treasure` (get key) → `temple` → Use key (sets door_open) → Enter temple (requires door_open) → `ending1` ✅
+   - OR: `intro` → `cave` → Explore side passage → `dungeon` → Search for weapon → `dungeon` (get sword) → Fight creature → `treasure` (get key) → `temple` → Use key (sets door_open) → Enter temple (requires door_open) → `ending1` ✅
+   - OR: `intro` → (get sword) → `temple` → Force door open (sets door_open, -25 HP) → Enter temple (requires door_open) → `ending1` ✅
 
 2. **Path to Alternative Ending (Ending2 - Power Within)**:
-   - `intro` → `ruins` → Read symbols → `ruins` (get knowledge) → `temple` → Study symbols → Absorb power → `ending2` ✅
+   - `intro` → `ruins` → Read symbols → `ruins` (get knowledge) → `temple` → Study symbols (sets door_open) → Absorb power → `ending2` ✅
 
 3. **Dangerous Path**:
    - `intro` → `forest` → Dangerous path → `danger` → (lose health) → `forest` → (continue or heal)
@@ -295,7 +295,7 @@ For better visualization, see the following diagram files in this directory:
    - `intro` → `forest` → Look for healing spring → `heal` → (restore health) → `forest`
 
 5. **Dungeon Path**:
-   - `intro` → `cave` → Explore side passage → `dungeon` → Search for weapon → `dungeon` (get sword) → Fight creature → `treasure` (get key) → `temple` → `ending1`
+   - `intro` → `cave` → Explore side passage → `dungeon` → Search for weapon → `dungeon` (get sword) → Fight creature → `treasure` (get key) → `temple` → Use key (sets door_open) → Enter temple (requires door_open) → `ending1`
 
 ---
 
@@ -306,13 +306,14 @@ For better visualization, see the following diagram files in this directory:
 | Flag Name | Description | How to Obtain |
 |-----------|-------------|---------------|
 | `torch` | Required to safely descend into the cave | From `forest`: "Search for supplies" |
-| `key` | Opens temple door | - From `cave` → `treasure` (requires torch)<br>- From `dungeon` → `treasure` (requires sword)<br>- From `treasure`: "Take the key and amulet" |
-| `amulet` | Opens temple door | - From `ruins`: "Examine the pedestal"<br>- From `treasure`: "Take the key and amulet" |
-| `sword` | Reduces combat damage, opens temple by force | - From `dungeon`: "Search for a weapon"<br>- From `treasure`: "Search for a weapon" |
+| `key` | Used to open temple door | - From `cave` → `treasure` (requires torch)<br>- From `dungeon` → `treasure` (requires sword)<br>- From `treasure`: "Take the key and amulet" |
+| `amulet` | Used to open temple door | - From `ruins`: "Examine the pedestal"<br>- From `treasure`: "Take the key and amulet" |
+| `sword` | Reduces combat damage, can force temple door open | - From `dungeon`: "Search for a weapon"<br>- From `treasure`: "Search for a weapon" |
 | `map` | Knowledge item | From `cave`: "Study the wall markings" |
 | `knowledge` | Opens temple door, unlocks ending2 | From `ruins`: "Read the ancient symbols" |
 | `potion` | Healing item | - From `village`: "Search for survivors"<br>- From `heal`: "Fill a container with the water" |
 | `gold` | Currency for negotiation | From `treasure`: "Take only the gold" |
+| `door_open` | Indicates temple door is unlocked | Set when using amulet, key, sword, or knowledge at temple |
 
 ### Flag Mechanics
 
@@ -323,8 +324,9 @@ For better visualization, see the following diagram files in this directory:
 ### Example Flag Usage
 
 - **Torch Requirement**: The choice "Descend deeper (needs torch)" in `cave` requires the `torch` flag
-- **Temple Access**: Multiple ways to open temple - amulet, key, sword (with health cost), or knowledge
+- **Temple Access**: Multiple ways to open temple - use amulet, key, sword (with health cost), or knowledge to set `door_open` flag, then enter with `door_open` flag
 - **Sword Advantage**: Having a sword reduces damage in combat encounters
+- **Door Opening**: Temple door-opening choices set the `door_open` flag, which is then required to enter the temple
 
 ---
 
@@ -348,7 +350,7 @@ For better visualization, see the following diagram files in this directory:
 | `danger2` | Fight the bandits | -20 HP | Moderate risk |
 | `danger2` | Fight with sword | -5 HP | Much less damage with sword |
 | `danger2` | Run away | -15 HP | Escape with damage |
-| `temple` | Force door open | -25 HP | Opens door but costs health |
+| `temple` | Force door open | -25 HP | Opens door (sets door_open) but costs health |
 | `heal` | Drink from spring | +25 HP | Moderate healing |
 | `heal` | Bathe in spring | +100 HP | Full restoration |
 
@@ -375,10 +377,10 @@ Health changes are specified in the `sets_flag` field using the format:
 
 **Ending1 - Hero's Return:**
 1. Start at `intro`
-2. Get amulet (from `ruins`) OR get key (from `treasure` via `cave` with torch OR `dungeon` with sword)
+2. Get amulet (from `ruins`) OR get key (from `treasure` via `cave` with torch OR `dungeon` with sword) OR get sword
 3. Navigate to `temple`
-4. Use amulet/key to open door
-5. Enter temple → `ending1` ✅
+4. Use amulet/key/sword/knowledge to open door (sets `door_open` flag)
+5. Enter temple (requires `door_open`) → `ending1` ✅
 
 **Ending2 - Power Within:**
 1. Start at `intro`
@@ -418,9 +420,10 @@ Health changes are specified in the `sets_flag` field using the format:
 2. **Flag Checking**: The backend checks `requires_flag` before displaying choices
 3. **Health Processing**: Health changes in `sets_flag` are parsed and applied by the `GameService`
 4. **Death Handling**: If health drops to 0, the player is automatically redirected to the `death` scene
-5. **Self-Loops**: Some choices loop back to the same scene but set flags (e.g., "Search for supplies" in `forest`)
+5. **Self-Loops**: Some choices loop back to the same scene but set flags (e.g., "Search for supplies" in `forest`). These are intentional for item acquisition and always have alternative exit paths.
 6. **Multiple Endings**: Two different endings based on player choices - `ending1` (hero) and `ending2` (power)
-7. **Temple Access**: Temple can be opened multiple ways - amulet, key, sword (costs health), or knowledge
+7. **Temple Access**: Temple can be opened multiple ways - use amulet, key, sword (costs health), or knowledge to set `door_open` flag, then enter with that flag
+8. **Infinite Loop Prevention**: All self-loops have alternative exit paths. The useless "Investigate empty houses" loop in village was removed to prevent player frustration.
 
 ---
 
