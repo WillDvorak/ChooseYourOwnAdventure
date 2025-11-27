@@ -22,10 +22,6 @@ public class Item {
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    // URL for image
-    @Column(nullable = false)
-    private String imageUrl;
-
     public Item() {
     }
 
@@ -33,7 +29,6 @@ public class Item {
         this.label = label;
         this.title = title;
         this.description = description;
-        this.imageUrl = imageUrl;
     }
 
     // Getters and setters
@@ -69,13 +64,6 @@ public class Item {
         this.description = description;
     }
 
-    public String getImageUrl() {
-        return imageUrl;
-    }
-
-    public void setImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
-    }
 
     @Override
     public String toString() {
@@ -84,7 +72,6 @@ public class Item {
                 ", label='" + label + '\'' +
                 ", title='" + title + '\'' +
                 ", description='" + description + '\'' +
-                ", image url='" + imageUrl + '\'' +
                 '}';
     }
 }

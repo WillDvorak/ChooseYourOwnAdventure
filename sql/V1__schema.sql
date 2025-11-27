@@ -62,6 +62,5 @@ CREATE TABLE items (
     label            VARCHAR(50) NOT NULL UNIQUE,        -- "torch", "key", etc.
     title           VARCHAR(100) NOT NULL,             -- "Torch", "Rusty Key"
     description     TEXT,                        -- item description
-    image_url       VARCHAR(255) NOT NULL,         -- Image URL
     PRIMARY KEY (id)
 ) ENGINE=InnoDB;

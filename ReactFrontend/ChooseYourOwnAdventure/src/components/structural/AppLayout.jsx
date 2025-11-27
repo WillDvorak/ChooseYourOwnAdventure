@@ -33,7 +33,7 @@ export default function AppLayout() {
     const [sceneInfo, setSceneInfo] = useState(null)
     // Passes down inventory information to inventory box
     // Passes setInventory to Textbox 
-    const [inventory, setInventory] = useState(["torch"])
+    const [inventory, setInventory] = useState([])
 
     /**
      * Handles giving or taking an item from the user
@@ -49,13 +49,12 @@ export default function AppLayout() {
             const newInv = prev.filter(invItem => invItem != item)
             setInventory(newInv)
         })
-
     }
 
 
     return <Container fluid>
         <Row>
-            <Col lg={3} style={{padding: '0px', maxHeight: '100vh', overflowY: 'auto'}}>
+            <Col lg={3} style={{padding: '0px', maxHeight: '100vh', overflowY: 'auto', overflowX: 'none'}}>
                 <DisplayBox theme={theme} sceneInfo={sceneInfo}/>
                 <InventoryBox theme={theme} inventory={inventory} />
                 <StoryMap currentScene={sceneInfo} />

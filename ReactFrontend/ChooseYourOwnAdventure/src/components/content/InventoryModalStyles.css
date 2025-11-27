@@ -1,0 +1,13 @@
+/* Size: tweak the dialog width */
+.custom-modal-dialog {
+  max-width: 700px;     
+}
+
+/* Background + border + text color of the modal box */
+.custom-modal-content {
+  background: linear-gradient(135deg, #1a0933 0%, #2d1b4e 100%);        /* dark background */
+  color: #fdf0ff;             
+  border: 3px solid #d4af37;  
+  border-radius: 12px;
+  box-shadow: 0 0 25px rgba(0, 0, 0, 0.6);
+}
