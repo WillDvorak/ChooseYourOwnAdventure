@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Container, Card, Form, Button } from "react-bootstrap"
 import useStorage from "../../hooks/useStorage";
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -17,6 +17,7 @@ const Textbox = (props) => {
     const [loading, setLoading] = useState(true);
     const [sessionId, setSessionId] = useState(null);
 
+
     const API_BASE = "/api/game";
 
     // Load the intro scene on component mount
@@ -30,14 +31,14 @@ const Textbox = (props) => {
             const response = await fetch(`${API_BASE}/session/create?playerName=Adventurer&startingScene=intro`, {
                 method: 'POST'
             });
-            
+
             if (!response.ok) {
                 throw new Error('Failed to create session');
             }
-            
+
             const sessionData = await response.json();
             setSessionId(sessionData.sessionId);
-            
+
             // Load the starting scene with the new session
             loadScene("intro", sessionData.sessionId);
         } catch (error) {
@@ -51,10 +52,10 @@ const Textbox = (props) => {
         setLoading(true);
         try {
             // Include sessionId in the request to get health data
-            const url = sessId 
+            const url = sessId
                 ? `${API_BASE}/scene/${sceneCode}?sessionId=${sessId}`
                 : `${API_BASE}/scene/${sceneCode}`;
-            
+
             const response = await fetch(url);
 
             if (!response.ok) {
@@ -104,17 +105,17 @@ const Textbox = (props) => {
                 const response = await fetch(`${API_BASE}/session/${sessionId}/choice/${choice.id}`, {
                     method: 'POST'
                 });
-                
+
                 if (!response.ok) {
                     throw new Error('Failed to process choice');
                 }
-                
+
                 const data = await response.json();
-                
+
                 // Update the UI with the new scene data (includes updated health)
                 setMessages((prev) => [...prev, data.body]);
                 props.onSceneChange(data);
-                
+
                 // Update choices
                 if (data.choices && data.choices.length > 0) {
                     const formattedChoices = data.choices.map((choice) => ({
@@ -128,18 +129,18 @@ const Textbox = (props) => {
                 } else {
                     setChoices([]);
                 }
-                
+
                 // Handle inventory for display purposes
                 if (choice.setsFlag && choice.setsFlag !== "" && !choice.setsFlag.startsWith("health:")) {
                     props.handleInventory(choice.setsFlag, true);
-        }
+                }
             } else {
                 // Fallback to old behavior if no session
                 if (choice.setsFlag && choice.setsFlag !== "") {
                     props.handleInventory(choice.setsFlag, true);
                 }
-        await loadScene(choice.targetScene);
-    }
+                await loadScene(choice.targetScene);
+            }
         } catch (error) {
             console.error('Error processing choice:', error);
             setMessages((prev) => [...prev, "⚠️ Error processing your choice"]);
@@ -147,6 +148,35 @@ const Textbox = (props) => {
             setLoading(false);
         }
     }
+
+    const messagesRef = useRef(null);
+
+    // Auto-scroll to bottom when messages or choices change
+    useEffect(() => {
+        if (messagesRef.current) {
+            // Always stick to bottom of the scrollable area
+            messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
+        }
+    }, [messages.length, choices.length, loading]);
+
+    // Keyboard listener for number keys to select choices
+    useEffect(() => {
+        const onKeyDown = (e) => {
+            if (loading) return;
+
+            const num = parseInt(e.key, 6); // "1" -> 1, "2" -> 2, etc.
+            if (Number.isNaN(num)) return;
+
+            const index = num - 1; // 1 -> 0, 2 -> 1...
+            if (index >= 0 && index < choices.length) {
+                e.preventDefault();
+                handleChoice(choices[index]);
+            }
+        };
+
+        window.addEventListener("keydown", onKeyDown);
+        return () => window.removeEventListener("keydown", onKeyDown);
+    }, [choices, loading, handleChoice]);
 
 
     return (
@@ -158,7 +188,16 @@ const Textbox = (props) => {
                 borderRadius: '12px',
                 padding: '1.5rem'
             }}>
-            <div style={{ maxHeight: '80vh', overflowY: 'auto', marginBottom: '1rem', scrollbarWidth: 'none' }}>
+            <div ref={messagesRef} style={{
+                overflowY: 'auto',
+                marginBottom: '0.5rem',
+                scrollbarWidth: 'none',
+                flex: 1,
+                minHeight: 0,
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "flex-end",
+            }}>
                 {messages.map((msg, i) => (
                     <p
                         style={{
@@ -170,7 +209,8 @@ const Textbox = (props) => {
                             borderRadius: '8px',
                             fontFamily: 'Georgia, serif',
                             fontSize: '1.1rem',
-                            lineHeight: '1.6'
+                            lineHeight: '1.6',
+
                         }}
                         key={i}
                     >

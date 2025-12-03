@@ -5,7 +5,7 @@ import './HealthBar.css';
 /**
  * 
  * @param {*} param0 
- * @returns 
+ * @returns a healthbar component that dynamically updates depending on the choices the user makes
  */
 const HealthBar = ({ health = 100, maxHealth = 100 }) => {
   const percentage = Math.max(0, Math.min((health / maxHealth) * 100, 100));

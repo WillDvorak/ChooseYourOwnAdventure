@@ -63,8 +63,8 @@ export default function InventoryBox(props) {
 
 
 
+
     const inventory = props.inventory ?? []
-    let placeholderImg = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ3vrTUU3CKbUDThpm8aZzFXdTmai6PodNfXA&s'
 
     return (
 
