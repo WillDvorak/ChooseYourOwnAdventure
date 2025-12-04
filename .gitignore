@@ -4,20 +4,51 @@ Thumbs.db
 *.zip
 
 # Logs & temp
-/logs/
-/*.log
-/tmp/
-/*.tmp
+logs/
+*.log
+tmp/
+*.tmp
 
-# IDE
+# IDE - IntelliJ / Eclipse / VS Code
 .idea/
+*.iws
 *.iml
+*.ipr
 .project
 .classpath
+.factorypath
 .settings/
+.vscode/
+
+# Spring Tool Suite
+.apt_generated
+.springBeans
+.sts4-cache
 
 # Gradle
-/build/
-/.gradle/
-/out/
-/bin/
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+# Build output
+out/
+bin/
+!**/src/main/**/out/
+!**/src/test/**/out/
+!**/src/main/**/bin/
+!**/src/test/**/bin/
+
+# NetBeans
+nbproject/private/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
+
+# Node
+node_modules/
+
+# Misc
+HELP.md

@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { Container, Row, Col, Card } from "react-bootstrap";
-import { BrowserRouter, Route, Routes } from 'react-router';
+import { Container, Row, Col } from "react-bootstrap";
 
 import Textbox from "../content/Textbox";
 import DisplayBox from "../content/DisplayBox";

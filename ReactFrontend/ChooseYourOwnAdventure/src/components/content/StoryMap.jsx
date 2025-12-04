@@ -2,24 +2,32 @@ import React, { useState, useEffect } from 'react';
 import './StoryMap.css';
 
 /**
- * 
- * @param {*} param0 
- * @returns a story map component with a compact layout for sidebar use
+ * StoryMap - Shows a visual map of all scenes in the game
+ * Highlights where the player currently is in the story
  */
 const StoryMap = ({ currentScene }) => {
+
+  // ===== STATE =====
+  // nodes = all the scenes in the game (boxes on the map)
+  // edges = connections between scenes (arrows on the map)
+  // loading = true while we're fetching data from the backend
   const [nodes, setNodes] = useState([]);
   const [edges, setEdges] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // ===== FETCH DATA ON LOAD =====
+  // Runs once when component mounts - gets the map structure from backend
   useEffect(() => {
     fetch('/api/game/story-map')
       .then(res => res.json())
       .then(data => {
-        // Compact layout for sidebar: 2 columns, smaller spacing
+
+        // Position each node in a grid layout (2 columns)
+        // x = horizontal position, y = vertical position
         const layoutNodes = data.nodes.map((node, index) => ({
           ...node,
-          x: 60 + (index % 2) * 120, // 2 columns, compact
-          y: 40 + Math.floor(index / 2) * 80, // Tighter row height
+          x: 60 + (index % 2) * 120,      // Alternates between 2 columns
+          y: 40 + Math.floor(index / 2) * 80, // New row every 2 nodes
         }));
         
         setNodes(layoutNodes);
@@ -32,26 +40,28 @@ const StoryMap = ({ currentScene }) => {
       });
   }, []);
 
-  // Helper to find node position by id
+  // ===== HELPER FUNCTIONS =====
+
+  // Finds the x,y position of a node by its ID
   const getNodePosition = (nodeId) => {
     const node = nodes.find(n => n.id === nodeId);
     return node ? { x: node.x, y: node.y } : { x: 0, y: 0 };
   };
 
-  // Calculate arrow path
+  // Gets start and end points for drawing an arrow between two nodes
   const getArrowPath = (from, to) => {
     const fromPos = getNodePosition(from);
     const toPos = getNodePosition(to);
     
-    // Simple straight line with arrow
     return {
-      x1: fromPos.x,
-      y1: fromPos.y,
-      x2: toPos.x,
-      y2: toPos.y
+      x1: fromPos.x,  // Start x
+      y1: fromPos.y,  // Start y
+      x2: toPos.x,    // End x
+      y2: toPos.y     // End y
     };
   };
 
+  // ===== LOADING STATE =====
   if (loading) {
     return (
       <div className="story-map-container-compact">
@@ -60,16 +70,22 @@ const StoryMap = ({ currentScene }) => {
     );
   }
 
+  // Get the current scene code to highlight it on the map
   const currentSceneCode = currentScene?.code;
 
+  // ===== RENDER THE MAP =====
   return (
     <div className="story-map-container-compact">
       <h3 className="story-map-title-compact">🗺️ Story Map</h3>
       
+      {/* SVG canvas where we draw the map */}
       <svg width="280" height="400" className="story-map-svg-compact">
-        {/* Draw edges first (so they appear behind nodes) */}
+
+        {/* ----- ARROWS (drawn first so they appear behind nodes) ----- */}
         {edges.map((edge, index) => {
           const arrow = getArrowPath(edge.from, edge.to);
+          
+          // Check if this arrow has special meaning
           const isHealthEdge = edge.setsFlag && edge.setsFlag.includes('health');
           const isConditional = edge.requiresFlag && edge.requiresFlag !== '';
           
@@ -83,13 +99,11 @@ const StoryMap = ({ currentScene }) => {
                 className={`edge ${isHealthEdge ? 'edge-health' : ''} ${isConditional ? 'edge-conditional' : ''}`}
                 markerEnd="url(#arrowhead)"
               />
-              {/* Edge label */}
-              {/* Skip edge labels in compact mode for clarity */}
             </g>
           );
         })}
         
-        {/* Arrow marker definition */}
+        {/* ----- ARROWHEAD SHAPE DEFINITION ----- */}
         <defs>
           <marker
             id="arrowhead"
@@ -103,11 +117,14 @@ const StoryMap = ({ currentScene }) => {
           </marker>
         </defs>
         
-        {/* Draw nodes */}
+        {/* ----- SCENE BOXES (nodes) ----- */}
         {nodes.map(node => {
           const isCurrentNode = node.id === currentSceneCode;
+          
           return (
             <g key={node.id} className="node-group">
+              
+              {/* The box itself */}
               <rect
                 x={node.x - 50}
                 y={node.y - 20}
@@ -116,6 +133,8 @@ const StoryMap = ({ currentScene }) => {
                 className={`node-compact ${node.isTerminal ? 'node-terminal' : 'node-regular'} ${isCurrentNode ? 'node-current' : ''}`}
                 rx="4"
               />
+              
+              {/* Pulsing circle around current scene */}
               {isCurrentNode && (
                 <circle
                   cx={node.x}
@@ -124,6 +143,8 @@ const StoryMap = ({ currentScene }) => {
                   className="node-pulse"
                 />
               )}
+              
+              {/* Scene name label */}
               <text
                 x={node.x}
                 y={node.y + 5}
@@ -141,4 +162,3 @@ const StoryMap = ({ currentScene }) => {
 };
 
 export default StoryMap;
-
