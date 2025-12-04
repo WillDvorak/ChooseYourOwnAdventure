@@ -187,6 +187,74 @@ public class GameService {
     }
     
     /**
+     * Get all saved game sessions for a player
+     * Sorted by most recently updated first
+     */
+    @Transactional(readOnly = true)
+    public List<GameSession> getSavedGames(String playerName) {
+        List<GameSession> sessions = gameSessionRepository.findByPlayerName(playerName);
+        // Sort by updatedAt descending (most recent first)
+        sessions.sort((a, b) -> b.getUpdatedAt().compareTo(a.getUpdatedAt()));
+        return sessions;
+    }
+    
+    /**
+     * Load a saved game session
+     * Returns the session if it exists and belongs to the player
+     */
+    @Transactional(readOnly = true)
+    public GameSession loadSavedGame(Long sessionId, String playerName) {
+        GameSession session = getGameSession(sessionId);
+        if (!session.getPlayerName().equals(playerName)) {
+            throw new GameSessionNotFoundException("Game session does not belong to player: " + playerName);
+        }
+        return session;
+    }
+    
+    /**
+     * Delete a saved game session
+     * Only allows deletion if the session belongs to the player
+     */
+    public void deleteSavedGame(Long sessionId, String playerName) {
+        GameSession session = getGameSession(sessionId);
+        if (!session.getPlayerName().equals(playerName)) {
+            throw new GameSessionNotFoundException("Game session does not belong to player: " + playerName);
+        }
+        gameSessionRepository.delete(session);
+    }
+    
+    /**
+     * Get a summary of a game session for listing saves
+     * Returns a simplified view with key information
+     */
+    @Transactional(readOnly = true)
+    public Map<String, Object> getSaveSummary(Long sessionId) {
+        GameSession session = getGameSession(sessionId);
+        Map<String, Object> flags = parseFlags(session.getFlagsJson());
+        Optional<Scene> scene = sceneRepository.findByCode(session.getCurrentSceneCode());
+        
+        Map<String, Object> summary = new HashMap<>();
+        summary.put("id", session.getId());
+        summary.put("playerName", session.getPlayerName());
+        summary.put("currentSceneCode", session.getCurrentSceneCode());
+        summary.put("currentSceneTitle", scene.map(Scene::getTitle).orElse("Unknown"));
+        summary.put("health", flags.getOrDefault("health", 100));
+        summary.put("maxHealth", flags.getOrDefault("maxHealth", 100));
+        summary.put("isEnded", isGameEnded(session));
+        summary.put("createdAt", session.getCreatedAt());
+        summary.put("updatedAt", session.getUpdatedAt());
+        
+        // Count items/flags
+        long itemCount = flags.entrySet().stream()
+            .filter(e -> !e.getKey().equals("health") && !e.getKey().equals("maxHealth"))
+            .filter(e -> e.getValue() instanceof Boolean && (Boolean) e.getValue())
+            .count();
+        summary.put("itemCount", itemCount);
+        
+        return summary;
+    }
+    
+    /**
      * Check if the game has ended (reached a terminal scene)
      */
     @Transactional(readOnly = true)

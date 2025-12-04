@@ -177,6 +177,124 @@ public class GameController {
     }
     
     /**
+     * Endpoint: GET /api/game/saves/{playerName}
+     * Get all saved games for a player
+     */
+    @GetMapping("/saves/{playerName}")
+    public ResponseEntity<?> getSavedGames(@PathVariable String playerName) {
+        try {
+            List<com.textquest.api.entity.GameSession> sessions = gameService.getSavedGames(playerName);
+            
+            // Convert to summary format
+            List<Map<String, Object>> saveSummaries = sessions.stream()
+                .map(session -> {
+                    try {
+                        return gameService.getSaveSummary(session.getId());
+                    } catch (Exception e) {
+                        // Fallback to basic info if summary fails
+                        Map<String, Object> basic = new java.util.HashMap<>();
+                        basic.put("id", session.getId());
+                        basic.put("playerName", session.getPlayerName());
+                        basic.put("currentSceneCode", session.getCurrentSceneCode());
+                        basic.put("updatedAt", session.getUpdatedAt());
+                        return basic;
+                    }
+                })
+                .collect(Collectors.toList());
+            
+            return ResponseEntity.ok(Map.of(
+                "playerName", playerName,
+                "saves", saveSummaries,
+                "count", saveSummaries.size()
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+    
+    /**
+     * Endpoint: GET /api/game/saves/{playerName}/{sessionId}
+     * Load a specific saved game
+     */
+    @GetMapping("/saves/{playerName}/{sessionId}")
+    public ResponseEntity<?> loadSavedGame(@PathVariable String playerName, 
+                                           @PathVariable Long sessionId) {
+        try {
+            com.textquest.api.entity.GameSession session = gameService.loadSavedGame(sessionId, playerName);
+            
+            // Get current scene with choices
+            Scene currentScene = sceneRepository.findByCode(session.getCurrentSceneCode())
+                .orElseThrow(() -> new RuntimeException("Scene not found: " + session.getCurrentSceneCode()));
+            
+            // Get available choices
+            List<Choice> choices = currentScene.getChoices();
+            List<Map<String, Object>> formattedChoices = choices.stream()
+                .map(choice -> {
+                    Map<String, Object> choiceMap = new java.util.HashMap<>();
+                    choiceMap.put("id", choice.getId());
+                    choiceMap.put("label", choice.getLabel());
+                    choiceMap.put("targetSceneCode", choice.getTargetSceneCode());
+                    choiceMap.put("requiresFlag", choice.getRequiresFlag() != null ? choice.getRequiresFlag() : "");
+                    choiceMap.put("setsFlag", choice.getSetsFlag() != null ? choice.getSetsFlag() : "");
+                    return choiceMap;
+                })
+                .collect(Collectors.toList());
+            
+            // Get player flags
+            Map<String, Object> flags = gameService.getPlayerFlags(sessionId);
+            
+            Map<String, Object> response = new java.util.HashMap<>();
+            response.put("sessionId", session.getId());
+            response.put("playerName", session.getPlayerName());
+            response.put("code", currentScene.getCode());
+            response.put("title", currentScene.getTitle());
+            response.put("body", currentScene.getBody());
+            response.put("isTerminal", currentScene.getIsTerminal());
+            response.put("choices", formattedChoices);
+            response.put("health", flags.getOrDefault("health", 100));
+            response.put("maxHealth", flags.getOrDefault("maxHealth", 100));
+            response.put("flags", flags);
+            response.put("updatedAt", session.getUpdatedAt());
+            
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+    
+    /**
+     * Endpoint: DELETE /api/game/saves/{playerName}/{sessionId}
+     * Delete a saved game
+     */
+    @DeleteMapping("/saves/{playerName}/{sessionId}")
+    public ResponseEntity<?> deleteSavedGame(@PathVariable String playerName,
+                                            @PathVariable Long sessionId) {
+        try {
+            gameService.deleteSavedGame(sessionId, playerName);
+            return ResponseEntity.ok(Map.of(
+                "message", "Save game deleted successfully",
+                "sessionId", sessionId
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+    
+    /**
+     * Endpoint: GET /api/game/session/{sessionId}/summary
+     * Get a summary of a game session
+     */
+    @GetMapping("/session/{sessionId}/summary")
+    public ResponseEntity<?> getSessionSummary(@PathVariable Long sessionId) {
+        try {
+            Map<String, Object> summary = gameService.getSaveSummary(sessionId);
+            return ResponseEntity.ok(summary);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+    
+    /**
      * Health check endpoint
      */
     @GetMapping("/health")
