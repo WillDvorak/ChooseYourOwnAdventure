@@ -46,7 +46,7 @@ INSERT INTO items (label, title, description) VALUES
 
 -- Knowledge
 ('knowledge', 'Spark of Knowledge',
- 'A sudden clarity blooms behind your eyes, like a lantern being lit inside your skull. You feel ideas slotting into place, cold and sharp as crystal, while pale rays of thought radiate outward in every direction. The sensation is both exhilarating and terrifying—your mind stretched wide open, every memory painfully bright. For a moment, you’re certain you can see the pattern behind everything… and equally certain that the pattern is staring back.'),
+ 'A sudden clarity blooms behind your eyes, like a lantern being lit inside your skull. You feel ideas slotting into place, cold and sharp as crystal, while pale rays of thought radiate outward in every direction. The sensation is both exhilarating and terrifying. Your mind stretched wide open, every memory painfully bright. For a moment, you''re certain you can see the pattern behind everything… and equally certain that the pattern is staring back.'),
 
 -- Potion
 ('potion', 'Healing Potion',
@@ -54,11 +54,11 @@ INSERT INTO items (label, title, description) VALUES
 
 -- Sword
 ('sword', 'Steel Sword',
- 'The sword’s weight settles into your hand with the familiarity of a bad habit. Its steel blade is straight and honest, dulled only by a dusting of time and scars from battles that were anything but. The leather-wrapped grip is worn where countless fingers have clenched in fear and fury, slick in some places, rough in others. When you raise it, the air around the edge seems to grow still, as if the world is waiting to see who will bleed next.'),
+ 'The sword''s weight settles into your hand with the familiarity of a bad habit. Its steel blade is straight and honest, dulled only by a dusting of time and scars from battles that were anything but. The leather-wrapped grip is worn where countless fingers have clenched in fear and fury, slick in some places, rough in others. When you raise it, the air around the edge seems to grow still, as if the world is waiting to see who will bleed next.'),
 
 -- Gold
 ('gold', 'Pouch of Gold',
- 'The small pouch of coins is soft and yielding, the leather worn thin where it has been clutched and hidden. Inside, the gold pieces chime against each other with a muted, greedy music whenever you move. They are warm to the touch, as though they’ve absorbed every grasping hand and feverish heartbeat that ever coveted them. Even through the bag, you can feel the weight of choices—doors that will open, oaths that will be broken, all paid for in quiet, shining circles.');
+ 'The small pouch of coins is soft and yielding, the leather worn thin where it has been clutched and hidden. Inside, the gold pieces chime against each other with a muted, greedy music whenever you move. They are warm to the touch, as though they''ve absorbed every grasping hand and feverish heartbeat that ever coveted them. Even through the bag, you can feel the weight of choices: doors that will open, oaths that will be broken, all paid for in quiet, shining circles.');
 
 
 -- ---------- Choices from intro ----------
@@ -207,7 +207,7 @@ FROM scenes WHERE code = 'temple';
 
 -- ---------- Treasure ----------
 INSERT INTO choices (scene_id, label, target_scene_code, requires_flag, sets_flag)
-SELECT id, 'Take the key and amulet', 'forest', NULL, 'key'
+SELECT id, 'Take the key and amulet', 'forest', NULL, 'amulet'
 FROM scenes WHERE code = 'treasure';
 
 INSERT INTO choices (scene_id, label, target_scene_code, requires_flag, sets_flag)

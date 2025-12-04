@@ -43,7 +43,7 @@ export default function InventoryModal({ item, onClose, theme, itemImages }) {
                             src={getItemImage(item.label)}
                             alt={`image of ${item.label}`}
                             fluid
-                            style={{ maxHeight: '300px', marginBottom: '20px' }}
+                            style={{ height: '300px', width: "300px", objectFit: "cover", objectPosition: "center", marginBottom: '20px' }}
                         />
                     </Col>
                     <Col>
