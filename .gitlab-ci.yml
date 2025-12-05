@@ -30,6 +30,7 @@ frontend:
     - npm ci
   script:
     - npm run lint
+    - npm test
     - npm run build
   cache:
     paths:
