@@ -35,3 +35,17 @@ frontend:
     paths:
       - ReactFrontend/ChooseYourOwnAdventure/node_modules/
 
+# Demo job that ALWAYS PASSES
+demo-pass:
+  stage: test
+  image: alpine:latest
+  script:
+    - echo "Demo job: this always passes ✅"
+
+# Demo job that ALWAYS FAILS (use only if you want to show a red pipeline)
+demo-fail:
+  stage: test
+  image: alpine:latest
+  script:
+    - echo "Demo job: this is supposed to fail"
+    - exit 1
