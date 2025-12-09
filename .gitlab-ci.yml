@@ -1,6 +1,7 @@
 stages:
   - test
 
+# Backend job: runs Spring Boot tests against a MySQL service
 backend:
   stage: test
   image: gradle:7-jdk17
@@ -22,6 +23,7 @@ backend:
     paths:
       - api/.gradle/
 
+# Frontend job: lints and builds the React application
 frontend:
   stage: test
   image: node:20
@@ -35,15 +37,14 @@ frontend:
     paths:
       - ReactFrontend/ChooseYourOwnAdventure/node_modules/
 
+# Demo job: always passes to show a successful CI job
 demo-pass:
   stage: test
   image: alpine:latest
-  script:
-    - echo "Demo CI job: this always passes."
+  script: "echo 'Demo CI job: this always passes.'"
 
+# Demo job: always fails to show CI catching errors
 demo-fail:
   stage: test
   image: alpine:latest
-  script:
-    - echo "Demo CI job: this is supposed to fail."
-    - exit 1
+  script: "echo 'Demo CI job: this is supposed to fail.' && exit 1"
