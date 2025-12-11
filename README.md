@@ -1,21 +1,64 @@
-# Specification Document
+# TextQuest - Echoes of the Shattered Realms
 
-Please fill out this document to reflect your team's project. This is a living document and will need to be updated regularly. You may also remove any section to its own document (e.g. a separate standards and conventions document), however you must keep the header and provide a link to that other document under the header.
+**Team**: Controlled Chaos
 
-Also, be sure to check out the Wiki for information on how to maintain your team's requirements.
+An interactive text-based choose-your-own-adventure game where players navigate through a fractured world of five realms, making choices that affect their journey, health, inventory, and ultimately, the game's ending.
 
-## TeamName
+## Quick Links
 
-<!--The name of your team.-->
-Controlled Chaos
+- **[Full Documentation](DOCUMENTATION.md)** - Complete project documentation
+- **[API Reference](API_REFERENCE.md)** - Quick API endpoint reference
+- **[Docker Setup Guide](DOCKER.md)** - Docker deployment instructions
+- **[Game Documentation](sql/GAME_DOCUMENTATION.md)** - Detailed game design and mechanics
+- **[Style Guide](STYLE.md)** - Coding standards and conventions
+
+## Quick Start
+
+### Using Docker (Recommended)
+
+```bash
+docker-compose -f docker-compose-full.yml up --build
+```
+
+Then access:
+- **Frontend**: http://localhost
+- **API**: http://localhost:8080
+- **API Health Check**: http://localhost:8080/api/game/health
+
+For detailed setup instructions, see [DOCKER.md](DOCKER.md).
+
+### Local Development
+
+**Backend**:
+```bash
+cd api
+./gradlew bootRun
+```
+
+**Frontend**:
+```bash
+cd ReactFrontend/ChooseYourOwnAdventure
+npm install
+npm run dev
+```
+
+See [DOCUMENTATION.md](DOCUMENTATION.md) for complete setup instructions.
+
+## Team
+
+**Controlled Chaos**
 
 ### Project Abstract
 
-<!--A one paragraph summary of what the software will do.-->
+This software provides an interactive **text-based** choose-your-own-adventure style game. Players make decisions that determine their path through the story, with consequences affecting their health, inventory, and the game's ending. The game features multiple paths, various in-game locations, and many different possible endings.
 
-This software will provide the user with an intereactive **text-based** choose your own adventure style game, it will prompt the user to make decisions and return reactions or consequences depending on the input of the user, allowing them to create their own unique experience. The user will be directed through various in game places, discussions, possible actions they can take, etc. There will be many different possible ending for the user to find!
+Players navigate through a branching narrative where their choices matter. The game includes:
+- **Health System**: Players have 100 HP that can be lost or restored
+- **Inventory System**: Collect items (torch, key, amulet, sword, etc.) that unlock new paths
+- **Multiple Endings**: Different endings based on player choices and collected items
+- **Story Map**: Visual representation of the game's story structure
 
-The user will make most of their choices through a 2 choice system, where their input places them within a unique scenario. The user will have an hp bar, inventory, as well as a map to help them on their adventure.
+For detailed game mechanics, see [sql/GAME_DOCUMENTATION.md](sql/GAME_DOCUMENTATION.md).
 
 <!-- This is an example paragraph written in markdown. You can use *italics*, **bold**, and other formatting options. You can also <u>use inline html</u> to format your text. The example sections included in this document are not necessarily all the sections you will want, and it is possible that you won't use all the one's provided. It is your responsibility to create a document that adequately conveys all the information about your project specifications and requirements. -->
 
@@ -23,7 +66,13 @@ The user will make most of their choices through a 2 choice system, where their 
 
 ### Customer
 
-The customer that may use this software is someone that enjoys text-based activities, they may be a big fan of reading but want to make it more interesting by chosing their own outcomes. The customer will see that they are provided with many paths to take, decisions to make, and flexibility in what they wish to do within the software.
+The target audience for this software includes:
+- Fans of text-based games and interactive fiction
+- Readers who enjoy making choices that affect the story
+- Players who appreciate exploration and multiple playthroughs
+- Users looking for a narrative-driven gaming experience
+
+The software provides many paths to take, meaningful decisions, and flexibility in gameplay, allowing each player to create their own unique experience.
 
 <!--A brief description of the customer for this software, both in general (the population who might eventually use such a system) and specifically for this document (the customer(s) who informed this document). Every project will have a customer from the CS506 instructional staff. Requirements should not be derived simply from discussion among team members. Ideally your customer should not only talk to you about requirements but also be excited later in the semester to use the system.-->
 
@@ -262,9 +311,40 @@ deactivate DjangoBackend
 
 ### Standards & Conventions
 
-<!--This is a link to a seperate coding conventions document / style guide-->
 [Style Guide & Conventions](STYLE.md)
+
+## Technology Stack
+
+- **Frontend**: React 19, Vite, Bootstrap
+- **Backend**: Java 17, Spring Boot 3.5.6
+- **Database**: MySQL 8.0
+- **Infrastructure**: Docker, Docker Compose, Nginx
+
+For detailed technology information, see [DOCUMENTATION.md](DOCUMENTATION.md#technology-stack).
+
+## Project Structure
+
+```
+Project_10/
+├── api/                    # Spring Boot backend
+├── ReactFrontend/          # React frontend
+├── sql/                    # Database migrations and game data
+├── docker-compose-full.yml # Docker Compose configuration
+└── Documentation files     # Various documentation files
+```
+
+## Documentation
+
+- **[DOCUMENTATION.md](DOCUMENTATION.md)** - Complete project documentation including architecture, setup, API docs, and more
+- **[API_REFERENCE.md](API_REFERENCE.md)** - Quick reference for all API endpoints
+- **[DOCKER.md](DOCKER.md)** - Docker setup and deployment guide
+- **[sql/GAME_DOCUMENTATION.md](sql/GAME_DOCUMENTATION.md)** - Detailed game design, scenes, and mechanics
+- **[STYLE.md](STYLE.md)** - Coding standards and conventions
 
 ## Docker
 
-This project uses Docker for easy setup and deployment. See [DOCKER.md](DOCKER.md) for instructions on how to run the application using Docker.
+This project uses Docker for easy setup and deployment. See [DOCKER.md](DOCKER.md) for detailed instructions on how to run the application using Docker.
+
+## Contributing
+
+This is a CS506 course project. For development guidelines, see [DOCUMENTATION.md](DOCUMENTATION.md#development-guide).
