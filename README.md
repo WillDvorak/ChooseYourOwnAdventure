@@ -68,6 +68,9 @@ graph TD;
     Display_Output --> End([End]);
     Error_Message --> End;
 ```
+### Example Image of Frontend
+
+<img width="3024" height="1720" alt="image" src="https://github.com/user-attachments/assets/025ca6c8-a628-4a0b-a9c6-0a13b7f553ff" />
 
 
 ### Standards & Conventions
