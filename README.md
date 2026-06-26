@@ -49,7 +49,7 @@ subgraph Back End
 end
 	
 subgraph Database
-	C[(MySQL), Docker]
+	C(MySQL, Docker)
 end
 
 A <-->|HTTP| B
